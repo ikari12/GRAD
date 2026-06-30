@@ -49,7 +49,7 @@
 \RequirePackage{lmodern}
 \RequirePackage{siunitx}
 \RequirePackage{textgreek}
-\RequirePackage{cleveref}
+%\RequirePackage{cleveref} % moved after hyperref (line 85)
 \RequirePackage{gensymb}
 \RequirePackage{textcomp}
 \RequirePackage[version=4]{mhchem}
