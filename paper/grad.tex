@@ -73,13 +73,15 @@ Three exploratory hypotheses were also examined:
 
 \subsection*{Data and Filtering}
 
-We used the FitRec dataset \cite{ni2018}, comprising 253,020 GPS-tracked workouts from Endomondo. Each workout record $j$ contains irregularly time-stamped arrays of heart rate ($\text{HR}_{j,i}$, optical wrist sensor, bpm), speed ($v_{j,i}$, GPS-derived, m/s), altitude ($a_{j,i}$, barometric or GPS-derived, m), and geographic coordinates, where $i = 1, \ldots, N_j$ indexes the data points. The gender variable indicates 94.0\% male, 4.8\% female, 1.2\% unknown; age, body mass, and training history are unavailable. Sensor make and firmware version are not recorded.
+We used the FitRec dataset \cite{ni2018}, comprising 253,020 GPS-tracked workouts from Endomondo. Each workout record $j$ contains irregularly time-stamped arrays of heart rate ($\text{HR}_{j,i}$, optical wrist sensor, bpm), speed ($v_{j,i}$, GPS-derived, km/h in the raw data), altitude ($a_{j,i}$, barometric or GPS-derived, m), and geographic coordinates, where $i = 1, \ldots, N_j$ indexes the data points. Where the recorded speed array was missing or shorter than 10 points, speed was derived from GPS coordinates via the Haversine formula (values exceeding 150~km/h were excluded as outliers). The gender variable indicates 94.0\% male, 4.8\% female, 1.2\% unknown; age, body mass, and training history are unavailable. Sensor make and firmware version are not recorded.
 
-A four-step inclusion pipeline was applied: (1)~HR, altitude, and speed arrays each required $N_j \geq 30$ finite data points; missing values were linearly interpolated between flanking valid points; (2)~total duration $T_j = t_{N_j} - t_1 > 90$~min; (3)~altitude range $\Delta a_j = \max_i(a_i) - \min_i(a_i) > 200$~m, ensuring variable terrain; (4)~each temporal half (H1: $i \leq \lfloor N_j/2 \rfloor$; H2: $i > \lfloor N_j/2 \rfloor$) required $\geq 5$ points with $v_i > 0.5$~km/h.
+A four-step inclusion pipeline was applied: (1)~HR, altitude, and speed arrays each required $N_j \geq 30$ finite data points; missing values were linearly interpolated between flanking valid points; (2)~total duration $T_j = t_{N_j} - t_1 > 90$~min; (3)~altitude range $\Delta a_j = \max_i(a_i) - \min_i(a_i) > 200$~m, ensuring variable terrain; (4)~each temporal half (H1: $i \leq \lfloor N_j/2 \rfloor$; H2: $i > \lfloor N_j/2 \rfloor$) required $> 5$ points with $v_i > 0.5$~km/h (i.e., $\geq 6$ per half). When speed was entirely unavailable, a heart-rate-only DI ($= \bar{\text{HR}}_{\text{H2}} / \bar{\text{HR}}_{\text{H1}}$) was computed as a fallback; FI and RI required speed.
 
 This yielded $N = 13{,}750$ workouts from $K = 675$ users for Study~1 (cycling 61.8\%, running 16.9\%, mountain biking 16.7\%, other 3.6\%; median duration 181~min [IQR 132--265]; median altitude range 349~m [IQR 263--545]; median HR 135~bpm [IQR 125--145]). Studies~2--3 required $\geq 5$ repeated workouts per user, yielding 2,343 workouts from 314 users.
 
 \subsection*{Metric Definitions}
+
+Speed in the raw data is recorded in km/h (metrics 1--3). For the within-workout regression (metrics 4--6), speed was converted to m/s by the recording software; the gradient computation in the regression uses speed in m/s and timestamps in seconds.
 
 \textbf{(1) Decoupling Index (DI).} Let $\mathcal{S}_h = \{i \in \text{H}_h : v_i > 0.5\text{~km/h}\}$ for $h \in \{1, 2\}$. The DI is:
 \[
@@ -87,23 +89,23 @@ This yielded $N = 13{,}750$ workouts from $K = 675$ users for Study~1 (cycling 6
 \]
 where $\bar{\text{HR}}_{\mathcal{S}_h} = |\mathcal{S}_h|^{-1}\sum_{i \in \mathcal{S}_h} \text{HR}_i$ and analogously for $\bar{v}$. DI $> 1$ indicates cardiac drift.
 
-\textbf{(2) Fading Index (FI).} The gradient range was partitioned into five bins $\mathcal{B}_b$: $[-50,-10)$, $[-10,-3)$, $[-3,3)$, $[3,10)$, $[10,50]$\%. Within each bin, speed ratios were computed for each half:
+\textbf{(2) Fading Index (FI).} For FI, point-to-point gradient was computed from the cumulative horizontal distance: $D_i = \sum_{l=1}^{i} v_l \cdot \Delta t_l / 3600 \times 1000$~(m), with minimum horizontal step 0.1~m, and $g_i = \text{clip}(100 \times \Delta a_i / \Delta D_i,\; -50,\; +50)$~\%. The gradient range was partitioned into five bins $\mathcal{B}_b$: $[-50,-10)$, $[-10,-3)$, $[-3,3)$, $[3,10)$, $[10,50)$~\%. Within each bin:
 \[
   \text{FI}_b = \frac{\bar{v}_{\mathcal{S}_2 \cap \mathcal{B}_b}}{\bar{v}_{\mathcal{S}_1 \cap \mathcal{B}_b}}, \quad \text{FI} = \frac{1}{|\mathcal{B}^*|} \sum_{b \in \mathcal{B}^*} \text{FI}_b
 \]
-where $\mathcal{B}^* = \{b : |\mathcal{S}_1 \cap \mathcal{B}_b| \geq 3 \text{ and } |\mathcal{S}_2 \cap \mathcal{B}_b| \geq 3\}$.
+where $\mathcal{B}^* = \{b : |\mathcal{S}_1 \cap \mathcal{B}_b| > 3 \text{ and } |\mathcal{S}_2 \cap \mathcal{B}_b| > 3\}$.
 
-\textbf{(3) Resilience Index (RI).} Altitude was smoothed by a centred moving average (window $w = \lfloor N/20 \rfloor$). Climbs $C_1, \ldots, C_m$ were identified as maximal segments of monotonically increasing smoothed altitude with vertical gain $> 50$~m. If $m \geq 2$:
+\textbf{(3) Resilience Index (RI).} Altitude was smoothed by a trailing moving average (window $w = \max(1, \lfloor N/20 \rfloor)$, mode = ``valid''). A climb was initiated when the smoothed altitude increased by $> 0.5$~m from one point to the next, and terminated when this condition ceased; only climbs with cumulative vertical gain $> 50$~m were retained. Let $C_1, \ldots, C_m$ denote the retained climbs. If $m \geq 2$:
 \[
-  \text{RI} = \bar{v}_{C_m} \,/\, \bar{v}_{C_1}
+  \text{RI} = \bar{v}_{C_m} \,/\, \bar{v}_{C_1}, \quad \bar{v}_{C_l} = \frac{1}{|\{i \in C_l : v_i > 0.5\}|} \sum_{\substack{i \in C_l \\ v_i > 0.5}} v_i
 \]
 Workouts with $m < 2$ received no RI.
 
-\textbf{(4--6) Within-workout regression.} Point-to-point gradient was defined as:
+\textbf{(4--6) Within-workout regression.} For the regression-derived metrics, speed was in m/s and gradient was computed as:
 \[
-  g_i = \text{clip}\!\left(100 \times \frac{a_{i+1} - a_i}{d_i},\; -50,\; +50\right), \quad d_i = \max(v_i \cdot \Delta t_i,\; 0.5\text{~m}), \quad \Delta t_i = \max(t_{i+1} - t_i,\; 0.1\text{~s})
+  g_i = \text{clip}\!\left(100 \times \frac{a_{i+1} - a_i}{d_i},\; -50,\; +50\right), \quad d_i = \max(v_i \cdot \Delta t_i,\; 0.1\text{~m}), \quad \Delta t_i = \max(t_{i+1} - t_i,\; 0.1\text{~s})
 \]
-All variables were evaluated at midpoints: $\text{HR}^*_i = (\text{HR}_i + \text{HR}_{i+1})/2$, $v^*_i = (v_i + v_{i+1})/2$, $t^*_i = (t_i + t_{i+1})/2$. On the subset of valid indices ($|\mathcal{V}| \geq 20$ required), the OLS regression:
+Note that the minimum distance floor is 0.1~m (not 0.5~m as in FI), reflecting the finer resolution needed for regression. All variables were evaluated at midpoints: $\text{HR}^*_i = (\text{HR}_i + \text{HR}_{i+1})/2$, $v^*_i = (v_i + v_{i+1})/2$, $t^*_i = (t_i + t_{i+1})/2$~(min). On the subset of valid indices ($|\mathcal{V}| \geq 20$ required), the OLS regression:
 \[
   \text{HR}^*_i = \beta_0 + \beta_{\text{grad}} \, g_i + \beta_{\text{speed}} \, v^*_i + \beta_{\text{time}} \, t^*_i + \varepsilon_i, \quad \hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
 \]
@@ -119,17 +121,19 @@ After outlier exclusion (1st and 99th percentiles), $N = 13{,}029$ workouts rema
 
 \subsection*{Study~1: Construct Validity ($N = 13{,}750$)}
 
-Pairwise Pearson correlations among DI, FI, and RI were estimated via nonparametric bootstrap ($B = 1{,}000$; resampled with replacement; 95\% CI from 2.5th and 97.5th percentiles). PCA was performed on column-standardised metrics ($z_{ij} = (x_{ij} - \bar{x}_j) / s_j$; $N_{\text{valid}} = 9{,}917$ complete cases). Factor retention was determined by parallel analysis \cite{horn1965}: observed eigenvalues were compared to the 95th percentile of eigenvalues from $B = 1{,}000$ column-wise random permutations. ICC(1,1) was computed for each metric on users with $\geq 5$ workouts (see Study~3).
+For each user with $\geq 5$ workouts, the median of each metric (DI, FI, RI) was computed, yielding person-level estimates. Pairwise Pearson correlations among person-level medians were estimated via nonparametric bootstrap ($B = 2{,}000$; users resampled with replacement; 95\% CI from 2.5th and 97.5th percentiles).
+
+PCA was performed on column-standardised person-level medians ($z_{ij} = (x_{ij} - \bar{x}_j) / s_j$) for users with valid values on all three metrics. Factor retention was determined by parallel analysis \cite{horn1965}: observed eigenvalues were compared to the 95th percentile of eigenvalues from $B = 100$ column-wise random permutations of standard normal data of the same dimensions. ICC(1,1) was computed for each metric on users with $\geq 5$ workouts (see Study~3).
 
 \subsection*{Study~2: Artifact Detection ($N = 2{,}343$ real $+ 5{,}000$ simulated)}
 
-\textbf{Route prediction.} Let $\mathbf{x}_j \in \mathbb{R}^{13}$ denote 13 route features (total ascent/descent, altitude range, max/min altitude, gradient mean/std, climb/descent/flat fractions, ascent-front and descent-front ratios, duration). Features were $z$-standardised per fold. Ridge regression:
+\textbf{Route prediction.} Let $\mathbf{x}_j \in \mathbb{R}^{13}$ denote 13 route features (total ascent/descent, altitude range, max/min altitude, gradient mean/std, climb/descent/flat fractions, ascent-front and descent-front ratios, duration). Features were $z$-standardised on the full training set. Ridge regression:
 \[
   \hat{\boldsymbol{\beta}}_{\text{ridge}} = (\mathbf{X}^\top \mathbf{X} + \alpha \mathbf{I})^{-1} \mathbf{X}^\top \mathbf{y}, \quad \alpha = 1.0
 \]
-and gradient boosted trees (100 trees, max depth 3) were fitted. Generalisation was assessed by group $k$-fold cross-validated $R^2$ ($k = 5$; all workouts of each user in the same fold):
+and gradient boosted trees (100 trees, max depth 3) were fitted. Generalisation was assessed by group $k$-fold cross-validated $R^2$ ($k = \min(5, K_{\text{valid}})$; all workouts of each user in the same fold):
 \[
-  R^2_{\text{CV}} = 1 - \frac{\sum_{f=1}^{5} \sum_{j \in \text{test}_f} (y_j - \hat{y}_j^{(f)})^2}{\sum_{f=1}^{5} \sum_{j \in \text{test}_f} (y_j - \bar{y})^2}
+  R^2_{\text{CV}} = 1 - \frac{\sum_{f=1}^{k} \sum_{j \in \text{test}_f} (y_j - \hat{y}_j^{(f)})^2}{\sum_{f=1}^{k} \sum_{j \in \text{test}_f} (y_j - \bar{y})^2}
 \]
 The hilly subset was restricted to $\Delta a_j > 500$~m. For GACD, the target was the within-person deviation $\tilde{y}_{kj} = y_{kj} - \bar{y}_{k\cdot}$ (users with $\geq 3$ workouts), isolating route effects from person-level means.
 
@@ -166,11 +170,11 @@ This was tested as a predictor of GACD via: (a)~between-person standardised coef
   \text{MS}_{\text{B}} = \frac{\sum_{k=1}^{K} n_k (\bar{x}_{k\cdot} - \bar{x}_{\cdot\cdot})^2}{K-1}, \quad \text{MS}_{\text{W}} = \frac{\sum_{k=1}^{K} \sum_{j=1}^{n_k} (x_{kj} - \bar{x}_{k\cdot})^2}{N-K}, \quad n_0 = \frac{N - \sum_k n_k^2/N}{K-1}
 \]
 
-\textbf{Variance partitioning.} The between-person share was $\%\text{Person} = \text{ICC} \times 100$. Within-person deviations $\tilde{x}_{kj} = x_{kj} - \bar{x}_{k\cdot}$ were predicted from the 13 route features via Ridge regression ($\alpha = 1.0$) with group $k$-fold CV ($k = 5$), yielding $R^2_{\text{route}}$. Because this prediction operates only on the within-person variance $(1 - \text{ICC})$:
+\textbf{Variance partitioning.} The between-person share was $\%\text{Person} = \text{ICC} \times 100$. Within-person deviations $\tilde{x}_{kj} = x_{kj} - \bar{x}_{k\cdot}$ were predicted from the 13 route features via Ridge regression ($\alpha = 1.0$) with group $k$-fold CV ($k = \min(5, K_{\text{valid}})$), yielding $R^2_{\text{route}}$. Because this prediction operates only on the within-person variance $(1 - \text{ICC})$:
 \[
   \%\text{Route} = \max(0,\, R^2_{\text{route}}) \times (1 - \text{ICC}) \times 100, \quad \%\text{Occasion} = 100 - \%\text{Person} - \%\text{Route}
 \]
-The residual $\%\text{Occasion}$ captures daily physiological state, environmental conditions, sensor noise, and unmodeled route variation.
+The residual $\%\text{Occasion}$ captures daily physiological state, environmental conditions, sensor noise, and unmodeled route variation. Uncertainty in the variance partitioning was estimated via user-level bootstrap ($B = 500$; 95\% CI from percentiles).
 
 \textbf{Route-matched sensitivity analysis.} Workout pairs were matched if:
 \[
@@ -178,13 +182,13 @@ The residual $\%\text{Occasion}$ captures daily physiological state, environment
 \]
 where $A^+$ denotes total ascent ($n = 451$ pairs, 78 users). Route-matched ICC provided an upper-bound estimate of person-level stability.
 
-\textbf{Split-half reliability and convergence.} For users with $\geq 2k$ chronologically ordered workouts, $r_{\text{sh}}$ between the mean of the first $k$ and the mean of the second $k$ workouts was corrected:
-\[
-  \text{SB}_k = \frac{2\,r_{\text{sh}}}{1 + r_{\text{sh}}}
-\]
-$\text{SB}_k$ was computed for $k = 2, 3, \ldots, 10$ to determine the minimum sessions for $\text{SB} \geq 0.80$. ICC sensitivity was verified across $n_{\min} \in \{3, 5, 7, 10\}$.
+\textbf{Split-half reliability.} For users with $\geq 10$ workouts, the Pearson $r$ between the mean of the first half and the mean of the second half of chronologically ordered workouts was corrected via the Spearman--Brown prophecy formula: $\text{SB} = 2r_{\text{sh}} / (1 + r_{\text{sh}})$.
 
-\textbf{Convergent validity.} User-level mean speed served as an external criterion; Pearson $r$ between each metric's user-level mean and mean speed was computed.
+\textbf{Convergence analysis.} For $k = 2, 3, \ldots, 10$, users with $\geq 2k$ workouts were selected. Workouts were randomly permuted within each user, then the first $k$ and second $k$ workouts were used to compute split-half $r$ and $\text{SB}_k$. This estimates the reliability achievable from $k$ randomly sampled sessions, providing guidance on the minimum sessions for $\text{SB} \geq 0.80$.
+
+\textbf{ICC sensitivity.} ICC was recomputed with minimum-workout thresholds $n_{\min} \in \{3, 5, 8, 10, 15\}$.
+
+\textbf{Convergent validity.} User-level median speed served as an external criterion; Pearson $r$ between each metric's user-level median and median speed was computed.
 
 \textbf{Software and reproducibility.} Python 3.12 (NumPy 1.26, SciPy 1.13, pandas 2.2, scikit-learn 1.5; random seed 42). Code: \url{https://github.com/ikari12/GRAD}.
 
@@ -193,12 +197,12 @@ $\text{SB}_k$ was computed for $k = 2, 3, \ldots, 10$ to determine the minimum s
 
 \subsection*{Construct Validity (H1, H2)}
 
-DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $N = 13{,}750$). PCA on standardized DI, FI, RI ($N = 9{,}917$) retained one factor (eigenvalue$_1 = 1.66$, 55.2\%; eigenvalue$_2 = 0.89$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$). All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$. H1 and H2 are confirmed.
+DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $B = 2{,}000$ on person-level medians). PCA on standardized person-level medians of DI, FI, RI retained one factor (eigenvalue$_1 = 1.66$, 55.2\%; eigenvalue$_2 = 0.89$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$). All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$. H1 and H2 are confirmed.
 
 \begin{table}[ht]
 \centering
 \small
-\caption{PCA eigenvalues and parallel analysis ($N = 9{,}917$). Loadings on PC1: DI $= -0.654$, FI $= +0.653$, RI $= +0.382$.}
+\caption{PCA eigenvalues and parallel analysis on person-level medians. Loadings on PC1: DI $= -0.654$, FI $= +0.653$, RI $= +0.382$.}
 \label{tab:pca}
 \begin{tabular}{@{}lcccl@{}}
 \toprule
