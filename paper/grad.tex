@@ -1,4 +1,5 @@
 \documentclass[times, twoside]{zHenriquesLab-StyleBioRxiv}
+\usepackage{bm}
 
 \leadauthor{Ikari}
 
@@ -76,21 +77,21 @@ All cross-validations used \texttt{GroupKFold(groups=userId)} to prevent data le
 
 Table~\ref{tab:main} presents the Person\,/\,Route\,/\,Occasion evaluation for all metrics. Key findings: (1)~Person variance increased from DI (16\%) to speed sensitivity (43\%); (2)~the ICC--SB discrepancy was largest for DI (0.16 vs.\ 0.63), supporting E3; (3)~gradient sensitivity was the only metric with a positive CV $R^2$ for Route ($+0.089$); and (4)~Occasion dominated all metrics ($> 50\%$), supporting H4.
 
-\begin{table}[ht]
+\begin{table}[t]
 \centering
-\small
-\caption{Unified metric evaluation across Person\,/\,Route\,/\,Occasion axes. SB = Spearman-Brown. All CV $R^2$ use \texttt{GroupKFold(groups=userId)}.}
+\caption{Unified metric evaluation across Person\,/\,Route\,/\,Occasion axes. SB~=~Spearman-Brown prophecy. All CV~$R^2$ use \texttt{GroupKFold(groups=userId)}.}
 \label{tab:main}
-\begin{tabular}{@{}l ccc cc c c@{}}
+\small
+\begin{tabular}{@{}lrrr rr r r@{}}
 \toprule
- & \multicolumn{3}{c}{\textbf{Person}} & \multicolumn{2}{c}{\textbf{Route}} & \textbf{Occ.} & \textbf{Val.} \\
+ & \multicolumn{3}{c}{\textbf{Person}} & \multicolumn{2}{c}{\textbf{Route}} & \textbf{Occasion} & \textbf{Validity} \\
 \cmidrule(lr){2-4} \cmidrule(lr){5-6} \cmidrule(lr){7-7} \cmidrule(lr){8-8}
-Metric & ICC & Spl-h & SB & $R^2_{\text{in}}$ & $R^2_{\text{CV}}$ & \% & Speed \\
+\textbf{Metric} & \textbf{ICC} & \textbf{Split-h} & \textbf{SB} & $\bm{R^2_{\text{in}}}$ & $\bm{R^2_{\text{CV}}}$ & \textbf{\%\,var} & \textbf{vs.\,Speed} \\
 \midrule
-DI & .16 & .45 & .63 & .013 & $-.006$ & \textbf{83} & --- \\
-GACD & .22 & .74 & .85 & .031 & $-.002$ & \textbf{78} & $-.05$ \\
-Grad.S. & .36 & \textbf{.82} & \textbf{.90} & .128 & \textbf{+.089} & 58 & $\mathbf{+.33}$ \\
-Speed S. & \textbf{.43} & \textbf{.87} & \textbf{.93} & .069 & $-.092$ & 57 & $-.13$ \\
+DI (naive)    & .16 & .45          & .63          & .013 & $-.006$          & \textbf{83\%} & ---              \\
+GACD (drift)  & .22 & .74          & .85          & .031 & $-.002$          & \textbf{78\%} & $-.05$ ns        \\
+\textbf{Grad.\ Sens.} & .36 & \textbf{.82} & \textbf{.90} & .128 & \textbf{+.089}   & 58\%            & $\bm{+.33^{**}}$ \\
+Speed Sens.   & \textbf{.43} & \textbf{.87} & \textbf{.93} & .069 & $-.092$          & 57\%            & $-.13$ ns        \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -119,26 +120,31 @@ With cardiac drift set to exactly zero, DI was predictable from route features a
 
 Table~\ref{tab:descent} shows that cardiac drift depends on the \textit{temporal placement} of descent, not its total amount.
 
-\begin{table}[ht]
+\begin{table}[t]
 \centering
-\small
-\caption{Descent placement effect on cardiac drift (GACD). $\beta^*$ = standardized partial regression coefficient.}
+\caption{Descent placement effect on cardiac drift (GACD). $\beta^*$~=~standardized partial regression coefficient.}
 \label{tab:descent}
-\begin{tabular}{@{}llr@{}}
+\small
+\begin{tabular}{@{}llrl@{}}
 \toprule
-Analysis & Statistic & Result \\
+\textbf{Analysis} & \textbf{Statistic} & \textbf{Result} & \textbf{Sig.} \\
 \midrule
-Total descent (amount) & $r$ & $+.03$ ns \\
-Descent-front (placement) & $\beta^*$ & $\mathbf{+.29^{***}}$ \\
-Group comparison (hilly) & Cohen's $d$ & $\mathbf{0.69^{***}}$ \\
-Within-person & Mean $r$ & $+.089^*$ \\[3pt]
-\textit{Steepness} & & \\
-\quad Gentle ($\sigma < 5$) & $r$ & $+.18^{***}$ \\
-\quad Moderate ($5$--$8$) & $r$ & $\mathbf{+.65^{***}}$ \\[3pt]
-\textit{Sport} & & \\
-\quad Cycling & $r$ & $+.14^{***}$ \\
-\quad Running & $r$ & $+.20^{*}$ \\
-\quad Mountain biking & $r$ & $+.01$ ns \\
+\multicolumn{4}{@{}l}{\textit{Amount vs.\ placement}} \\
+\quad Total descent        & $r$          & $+.03$         & ns             \\
+\quad Descent-front ratio  & $\beta^*$    & $\bm{+.29}$    & $\bm{***}$     \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Effect size}} \\
+\quad Group comparison     & Cohen's $d$  & $\bm{0.69}$    & $\bm{***}$     \\
+\quad Within-person        & Mean $r$     & $+.089$        & $*$            \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Steepness interaction}} \\
+\quad Gentle ($\sigma_{\text{grad}} < 5$)  & $r$ & $+.18$  & $***$          \\
+\quad Moderate ($5$--$8$)                   & $r$ & $\bm{+.65}$  & $\bm{***}$     \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Sport-specific}} \\
+\quad Cycling              & $r$          & $+.14$         & $***$          \\
+\quad Running              & $r$          & $+.20$         & $*$            \\
+\quad Mountain biking      & $r$          & $+.01$         & ns             \\
 \bottomrule
 \end{tabular}
 \end{table}
