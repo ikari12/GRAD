@@ -119,13 +119,13 @@ DI was recomputed with the denominator replaced by estimated metabolic power $P_
 \]
 After outlier exclusion (1st and 99th percentiles), $N = 13{,}029$ workouts remained.
 
-\subsection*{Study~1: Construct Validity ($N = 13{,}750$)}
+\subsection*{Study~1: Construct Validity --- H1 (DI--FI redundancy), H2 (ICC $< 0.50$)}
 
-For each user with $\geq 5$ workouts, the median of each metric (DI, FI, RI) was computed, yielding person-level estimates. Pairwise Pearson correlations among person-level medians were estimated via nonparametric bootstrap ($B = 2{,}000$; users resampled with replacement; 95\% CI from 2.5th and 97.5th percentiles).
+To test whether the proposed four dimensions are empirically distinct (H1) and individually reliable (H2), person-level medians of DI, FI, and RI were computed for each user with $\geq 5$ workouts ($N = 13{,}750$). Pairwise Pearson correlations were estimated via nonparametric bootstrap ($B = 2{,}000$; users resampled with replacement; 95\% CI from 2.5th and 97.5th percentiles). If H1 holds, DI and FI should show a strong negative correlation (FI $< 1$ when DI $> 1$) and PCA should retain only one factor.
 
-PCA was performed on column-standardised person-level medians ($z_{ij} = (x_{ij} - \bar{x}_j) / s_j$) for users with valid values on all three metrics. Factor retention was determined by parallel analysis \cite{horn1965}: observed eigenvalues were compared to the 95th percentile of eigenvalues from $B = 100$ column-wise random permutations of standard normal data of the same dimensions. ICC(1,1) was computed for each metric on users with $\geq 5$ workouts (see Study~3).
+PCA was performed on column-standardised person-level medians ($z_{ij} = (x_{ij} - \bar{x}_j) / s_j$) for users with valid values on all three metrics. Factor retention was determined by parallel analysis \cite{horn1965}: observed eigenvalues were compared to the 95th percentile of eigenvalues from $B = 100$ column-wise random permutations of standard normal data of the same dimensions. ICC(1,1) was computed for each metric on users with $\geq 5$ workouts (see Study~3); H2 predicts all ICCs $< 0.50$.
 
-\subsection*{Study~2: Artifact Detection ($N = 2{,}343$ real $+ 5{,}000$ simulated)}
+\subsection*{Study~2: Artifact Detection --- H3 (route artifact), E1 (descent placement)}
 
 \textbf{Route prediction.} Let $\mathbf{x}_j \in \mathbb{R}^{13}$ denote 13 route features (total ascent/descent, altitude range, max/min altitude, gradient mean/std, climb/descent/flat fractions, ascent-front and descent-front ratios, duration). Features were $z$-standardised on the full training set. Ridge regression:
 \[
@@ -160,7 +160,9 @@ No time-dependent term was included; any non-unity DI arises purely from gradien
 \]
 This was tested as a predictor of GACD via: (a)~between-person standardised coefficient $\beta^*$ (controlling for total descent); (b)~within-person Pearson $r$ for users with $\geq 5$ varied routes ($n = 108$); (c)~steepness stratification ($\sigma_g < 5$; $5$--$8$; $> 8$); (d)~sport-specific subgroups. All eight exploratory $p$-values were adjusted by Benjamini--Hochberg FDR \cite{benjamini1995}.
 
-\subsection*{Study~3: Variance Decomposition ($N = 2{,}343$)}
+\subsection*{Study~3: Variance Decomposition --- H4 (Occasion dominance), E2, E3}
+
+Study~1 establishes that no dimension reaches ICC $\geq 0.50$ (H2), but does not explain \textit{why}. Study~3 decomposes the total variance of each HR-response metric into three sources---Person, Route, and Occasion---to test whether transient day-to-day variation is the dominant source (H4). If H4 holds, it provides a mechanistic explanation for H2: low ICCs arise not because the metrics are poorly defined, but because within-person session-to-session fluctuation overwhelms the between-person signal. Study~3 also compares metrics to identify the most reliable candidate (E2) and examines whether rank-order consistency exceeds absolute consistency (E3).
 
 \textbf{ICC(1,1).} One-way random-effects ANOVA \cite{shrout1979} for users with $n_k \geq 5$:
 \[
@@ -195,9 +197,13 @@ where $A^+$ denotes total ascent ($n = 451$ pairs, 78 users). Route-matched ICC 
 % ============================================================
 \section*{Results}
 
-\subsection*{Construct Validity (H1, H2)}
+Results are organised by CRQ. Study~1 and Study~2 address CRQ1 (dimensionality); Study~3 addresses CRQ2 (variance structure) and provides the causal explanation for CRQ1.
 
-DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $B = 2{,}000$ on person-level medians). PCA on standardized person-level medians of DI, FI, RI retained one factor (eigenvalue$_1 = 1.66$, 55.2\%; eigenvalue$_2 = 0.89$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$). All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$. H1 and H2 are confirmed.
+\subsection*{CRQ1: Dimensionality --- DI--FI redundancy (H1) and low reliability (H2)}
+
+DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $B = 2{,}000$ on person-level medians), confirming H1: when DI rises (apparent cardiac drift), FI falls (apparent fading) for the same workout, because both respond to the same gradient asymmetry. PCA on standardized person-level medians of DI, FI, RI retained one factor (eigenvalue$_1 = 1.66$, 55.2\%; eigenvalue$_2 = 0.89$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$), indicating a two-dimensional structure: one DI--FI factor and one RI factor.
+
+All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$ (H2 confirmed). This means that the same person produces widely different values across sessions, precluding the reliable measurement of four independent dimensions. The question of \textit{why} ICCs are so low is deferred to CRQ2 (Study~3).
 
 \begin{table}[ht]
 \centering
@@ -215,7 +221,9 @@ PC3 & 0.455 & 15.2 & 0.994 & No \\
 \end{tabular}
 \end{table}
 
-\subsection*{Simulation Proof of Artifact (H3)}
+\subsection*{CRQ1: The DI--FI collapse is caused by a route-geometry artifact (H3)}
+
+The DI--FI redundancy observed in H1 could, in principle, reflect a genuine physiological coupling. To distinguish artifact from physiology, Study~2 tested whether DI is predictable from route features alone---even when no cardiac drift exists.
 
 \begin{figure}[ht]
 \centering
@@ -224,16 +232,18 @@ PC3 & 0.455 & 15.2 & 0.994 & No \\
 \label{fig:simulation}
 \end{figure}
 
-With cardiac drift set to exactly zero, DI was predictable from route features alone (CV $R^2 = 0.82$). In real data, CV $R^2 = 0.58$ (all routes) and $0.60$ (hilly subset). After gradient correction (GACD), route predictability vanished (CV $R^2 = -0.03$). H3 is confirmed.
+With cardiac drift set to exactly zero, DI was predictable from route features alone (CV $R^2 = 0.82$; Figure~\ref{fig:simulation}). In real data, CV $R^2 = 0.58$ (all routes) and $0.60$ (hilly subset). After gradient correction (GACD), route predictability vanished (CV $R^2 = -0.03$). H3 is confirmed: speed-based DI measures route geometry, not physiology. This establishes the \textit{mechanism} behind H1---DI and FI collapse because both are algebraic consequences of the same gradient asymmetry between temporal halves.
 
-A natural question is whether replacing speed with estimated metabolic power---computed as $\text{speed} \times C_r(g)$ where $C_r(g)$ is the Minetti \cite{minetti2002} gradient cost function---would eliminate the artifact. It does not: DI/EstPower showed a \textit{stronger} route dependency in the opposite direction ($r = -0.76$ vs.\ $+0.48$ for DI/Speed; CV $R^2 = 0.57$ vs.\ $0.19$). The overcorrection occurs because the Minetti cost function approaches zero on moderate descents ($C_r \approx 0.4$ J/kg/m at $-3\%$), inflating the DI denominator ratio. This result validates the regression-based approach (GACD) as the appropriate gradient correction method.
+A natural question is whether replacing speed with estimated metabolic power---computed as $\text{speed} \times C_r(g)$ where $C_r(g)$ is the Minetti \cite{minetti2002} gradient cost function---would eliminate the artifact. It does not: DI/EstPower showed a \textit{stronger} route dependency in the opposite direction ($r = -0.76$ vs.\ $+0.48$ for DI/Speed; CV $R^2 = 0.57$ vs.\ $0.19$). The overcorrection occurs because the Minetti cost function approaches zero on moderate descents ($C_r \approx 0.4$ J/kg/m at $-3\%$), inflating the DI denominator ratio. This validates the regression-based correction (GACD) over formulaic power substitution.
 
-\subsection*{Variance Decomposition (H4, E2, E3)}
+\subsection*{CRQ2: Day-to-day variation explains why ICCs are low (H4)}
+
+CRQ1 established \textit{what}: the 4D structure reduces to 2D, and no dimension is reliable. CRQ2 asks \textit{why}. If Occasion (day-to-day variation) dominates the total variance, it would mechanistically explain the low ICCs from H2---not because the metrics are poorly defined, but because within-person session-to-session fluctuation overwhelms the stable between-person signal.
 
 \begin{table}[ht]
 \centering
 \small
-\caption{Metric evaluation across Person\,/\,Route\,/\,Occasion axes.}
+\caption{Variance decomposition and reliability across Person\,/\,Route\,/\,Occasion axes (Study~3).}
 \label{tab:main}
 \begin{tabular}{@{}l ccc cc c c@{}}
 \toprule
@@ -249,11 +259,15 @@ Speed S. & \textbf{.43} & \textbf{.87} & \textbf{.93} & .069 & $-.092$ & 57 & $-
 \end{tabular}
 \end{table}
 
-Occasion dominated all metrics (57--83\%), confirming H4. Gradient sensitivity outperformed DI across all criteria (E2). The ICC--SB discrepancy was largest for DI (0.16 vs.\ 0.63), confirming E3: rank-order consistency is substantially higher than absolute consistency when Occasion variance is large.
+Occasion dominated all metrics (57--83\%), confirming H4 (Table~\ref{tab:main}). This directly explains the low ICCs from H2: the between-person signal (Person = 16--43\%) is swamped by within-person fluctuation, making single-session measurement unreliable regardless of how the metric is defined.
 
-Route-matched ICC ($n = 451$ matched pairs) substantially increased Person estimates for all metrics: GACD ($0.22 \rightarrow 0.47$), gradient sensitivity ($0.36 \rightarrow 0.52$), speed sensitivity ($0.43 \rightarrow 0.73$). This indicates that 16--30 percentage points of variance previously attributed to Occasion is actually route-related, reducing the residual to 27--53\%.
+Route-matched ICC ($n = 451$ matched pairs) provided a stricter test by holding route approximately constant. Person estimates increased for all metrics: GACD ($0.22 \rightarrow 0.47$), gradient sensitivity ($0.36 \rightarrow 0.52$), speed sensitivity ($0.43 \rightarrow 0.73$). This indicates that 16--30 percentage points of variance previously attributed to Occasion is actually route-related, reducing the residual to 27--53\%. Even after controlling for both Person and Route, however, 27--53\% of the HR response varies from session to session---the core finding persists.
 
-Convergence analysis (Figure~\ref{fig:framework}) showed that gradient sensitivity reached SB $\geq 0.80$ at $k = 6$ sessions (SB$_5 = 0.80$, SB$_{10} = 0.88$), speed sensitivity at $k = 3$ (SB$_3 = 0.81$), while GACD never reached 0.80 even at $k = 10$ (SB$_{10} = 0.71$).
+\textbf{Implications for CRQ1.} The Occasion dominance also explains the DI--FI collapse (H1) at a deeper level: because within-person fluctuation is so large, any metric computed from a single session will be dominated by noise, making inter-metric correlations reflect shared measurement error rather than distinct physiological constructs.
+
+\textbf{Comparative reliability (E2, E3).} Gradient sensitivity outperformed DI across all criteria (E2): higher ICC, higher SB, the only positive route CV $R^2$, and the strongest speed correlation. The ICC--SB discrepancy was largest for DI (0.16 vs.\ 0.63), confirming E3: rank-order consistency is substantially higher than absolute consistency, meaning within-person \textit{trends} are interpretable even though single-session values are not.
+
+Convergence analysis (Figure~\ref{fig:framework}) quantified the practical consequence: gradient sensitivity reached SB $\geq 0.80$ at $k = 6$ sessions (SB$_5 = 0.80$, SB$_{10} = 0.88$), speed sensitivity at $k = 3$ (SB$_3 = 0.81$), while GACD never reached 0.80 even at $k = 10$ (SB$_{10} = 0.71$).
 
 \begin{figure}[ht]
 \centering
@@ -262,7 +276,7 @@ Convergence analysis (Figure~\ref{fig:framework}) showed that gradient sensitivi
 \label{fig:framework}
 \end{figure}
 
-\subsection*{Descent Placement (E1)}
+\subsection*{Exploratory: Descent Placement (E1)}
 
 \begin{table}[ht]
 \centering
@@ -292,21 +306,17 @@ A between-person association was observed between descent-front ratio and cardia
 % ============================================================
 \section*{Discussion}
 
-\subsection*{CRQ1: A Two-Dimensional Structure Is Supported}
+\subsection*{CRQ1 $\rightarrow$ CRQ2: A Causal Chain from Artifact to Occasion}
 
-All three confirmatory hypotheses under CRQ1 were supported. DI and FI collapse onto one PCA factor ($r = -0.60$; eigenvalue$_1 = 1.66$, PC2 below parallel threshold), confirming DI--FI redundancy (H1) and Millet's \cite{millet2025} theoretical critique. All dimension ICCs fell below 0.50 (H2), indicating insufficient reliability for four independent constructs. Speed-based DI was predictable from route geometry alone ($R^2 = 0.82$ in simulation, $0.60$ in real data), and this predictability vanished after gradient correction (GACD CV $R^2 = -0.03$; H3). The data support a two-dimensional structure: one DI--FI dimension capturing the pace--HR coupling (which is dominated by route artifacts and requires correction), and one RI dimension capturing session-to-session consistency (which is independent but poorly reliable). Friel's $< 5\%$ rule \cite{friel2009}, itself never empirically validated, is applicable only on flat or symmetric courses.
+The three studies form a causal chain. Study~1 showed that DI and FI collapse onto one factor (H1) and no dimension reaches adequate reliability (H2). Study~2 identified the \textit{mechanism}: speed-based DI is an algebraic artifact of gradient asymmetry ($R^2 = 0.82$ with zero drift; H3), which disappears after regression-based correction (GACD, CV $R^2 = -0.03$). Study~3 revealed the \textit{root cause}: Occasion variance (57--83\%) swamps Person variance (16--43\%), explaining why ICCs are low (H4) and why DI--FI correlations reflect shared noise rather than distinct constructs. This confirms Millet's \cite{millet2025} theoretical critique with quantitative evidence: under speed-based DI, the data support a two-dimensional structure (one DI--FI factor, one independent RI factor). Friel's $< 5\%$ rule \cite{friel2009}, itself never empirically validated, is applicable only on flat or symmetric courses.
 
-Our analyses use $\text{HR}/\text{Speed}$, not $\text{HR}/\text{Power}$. The route artifact is specific to speed-based DI; power meters measure workload directly. However, naive power estimation from gradient cost functions does not solve the problem: DI computed with Minetti-estimated power \cite{minetti2002} produced a \textit{larger} artifact in the opposite direction (CV $R^2 = 0.57$ vs.\ $0.19$; $r = -0.76$ vs.\ $+0.48$). The nonlinearity of metabolic cost near zero gradient creates a denominator instability that overcorrects the bias. Statistical gradient correction via regression (GACD) is preferable to formulaic power substitution. Whether the two-dimensional structure extends to \textit{measured} power-based DI remains an open question.
+Our analyses use $\text{HR}/\text{Speed}$, not $\text{HR}/\text{Power}$. The route artifact (H3) is specific to speed-based DI; power meters measure workload directly. However, naive power estimation from gradient cost functions does not solve the problem: DI computed with Minetti-estimated power \cite{minetti2002} produced a \textit{larger} artifact in the opposite direction (CV $R^2 = 0.57$ vs.\ $0.19$; $r = -0.76$ vs.\ $+0.48$). Whether the two-dimensional structure extends to \textit{measured} power-based DI remains an open question.
 
-\subsection*{CRQ2: Day-to-Day Variation Explains the Dimensionality Reduction}
+\subsection*{Practical Implications: Multi-Session Aggregation Is Essential}
 
-The central finding of this study is that day-to-day variation---not person, not route---dominates HR-response metrics. Occasion accounted for 57--83\% of variance (H4 confirmed). Route-matched ICC analysis reduced the residual to 27--53\%, but even with person \textit{and} route controlled, the HR response differs substantially from session to session. This was not explained by effort intensity ($r = -0.004$, ns).
+The Occasion dominance (H4) has a direct practical consequence: \textit{no single-session HR-response metric can reliably assess fitness}. This provides the first quantitative evidence for the IOC consensus \cite{bourdon2017} principle that external load $\neq$ internal response. Unmeasured factors---sleep, hydration, temperature, stress \cite{halson2014}---are the primary determinants of field HR responses. The route-matched residual (27--53\%) was not explained by effort intensity ($r = -0.004$, ns).
 
-This provides the first quantitative evidence for the IOC consensus \cite{bourdon2017} principle that external load $\neq$ internal response. Unmeasured factors---sleep, hydration, temperature, stress \cite{halson2014}---are the primary determinants of field HR responses.
-
-The practical consequence is that \textit{no single-session HR-response metric can reliably assess fitness}. Our convergence analysis provides specific guidance: gradient sensitivity requires $\geq 6$ sessions (SB $\geq 0.80$), speed sensitivity $\geq 3$, while GACD never reaches adequate reliability even at 10 sessions (SB$_{10} = 0.71$).
-
-The ICC--SB discrepancy (E3: DI 0.16 vs.\ 0.63; gradient sensitivity 0.36 vs.\ 0.90) reveals that rank-order consistency is preserved despite poor absolute consistency. This means within-person \textit{trends} are interpretable, but between-person \textit{comparisons} from single sessions are not.
+Our convergence analysis provides specific guidance: gradient sensitivity requires $\geq 6$ sessions (SB $\geq 0.80$), speed sensitivity $\geq 3$, while GACD never reaches adequate reliability even at 10 sessions (SB$_{10} = 0.71$). The ICC--SB discrepancy (E3) reveals that rank-order consistency is preserved despite poor absolute consistency---within-person \textit{trends} are interpretable, but between-person \textit{comparisons} from single sessions are not.
 
 \subsection*{Descent Placement: Suggestive but Unconfirmed (E1)}
 
