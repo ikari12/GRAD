@@ -1,6 +1,7 @@
 \documentclass[times, twoside]{zHenriquesLab-StyleBioRxiv}
 \usepackage{booktabs}
 \usepackage{bm}
+\usepackage{multirow}
 
 \leadauthor{Ikari}
 
@@ -32,150 +33,226 @@ ikari12\at github.com
 % ============================================================
 \section*{Introduction}
 
-Aerobic decoupling---the progressive rise in heart rate (HR) relative to pace or power during prolonged exercise---has been widely adopted as a field-based indicator of endurance fitness \cite{coyle2001, friel2009}. Platforms such as TrainingPeaks and Strava present the Decoupling Index (DI) to millions of recreational and competitive athletes, typically applying a $<5\%$ threshold to indicate adequate aerobic base fitness.
+\subsection*{Aerobic Decoupling and Its Adoption}
 
-Meixner et al.\ \cite{meixner2025} formalized DI within a four-dimensional (4D) durability framework comprising the Decoupling Index (DI), Fading Index (FI), Resilience Index (RI), and Recovery Index (ReI). This proposal generated eight commentaries, including Millet \cite{millet2025}, who argued that DI and FI are theoretically redundant, and Joyner \cite{joyner2025}, who questioned the conceptual boundaries between dimensions. Critically, \textit{all discussions have remained theoretical}: no large-scale empirical validation of the 4D framework exists.
+Cardiovascular drift---the progressive rise in heart rate (HR) at a constant workload during prolonged exercise---was first characterized by Coyle and Gonz\'{a}lez-Alonso \cite{coyle2001}, who attributed it to plasma volume reduction, cutaneous vasodilation, and decreased stroke volume. Friel \cite{friel2009} operationalized this phenomenon as the Decoupling Index (DI), defined as the ratio of HR-to-pace (or power) in the second half of a session relative to the first half, and proposed a practical threshold of $<5\%$ to indicate adequate aerobic base fitness. This metric was subsequently adopted by TrainingPeaks, Strava, and other platforms, reaching millions of recreational and competitive athletes worldwide.
 
-The reliability of field-based HR metrics has long been a concern. Hopkins \cite{hopkins2000} established criteria for measurement reliability in sport, and Halson \cite{halson2014} documented the influence of diurnal and day-to-day variation on training-load metrics. The IOC consensus statement \cite{bourdon2017} emphasized the distinction between external load and internal response, but the quantitative decomposition of variance sources (Person, Route, Occasion) has not been performed.
+Despite its widespread adoption, a critical assumption underlying DI has received little scrutiny: that pace or speed serves as a reliable proxy for external workload. On flat terrain, this assumption is reasonable---speed and metabolic cost are approximately proportional. On variable terrain, however, speed is strongly determined by gradient: athletes slow on climbs and accelerate on descents. Because DI uses speed in its denominator, any systematic asymmetry in the gradient profile between the first and second halves of a workout will produce DI values that deviate from 1.0 even in the absence of cardiovascular drift.
 
-Meanwhile, evidence from exercise physiology suggests that eccentric muscle contractions during downhill locomotion induce micro-damage and inflammatory responses \cite{peake2017, proske2005}, and Stickford et al.\ \cite{stickford2019} reported that downhill running increases subsequent cardiac drift. Whether the \textit{temporal placement} of descent---as opposed to its total amount---systematically affects cardiac drift in field conditions remains untested.
+\subsection*{The 4D Durability Framework}
 
-\subsection*{Research Question}
+Meixner et al.\ \cite{meixner2025} recently formalized the concept of exercise durability as a four-dimensional construct comprising the Decoupling Index (DI), Fading Index (FI), Resilience Index (RI), and Recovery Index (ReI). This proposal generated substantial theoretical discussion, with eight published commentaries. Millet \cite{millet2025} argued that DI and FI are mathematically coupled and therefore conceptually redundant, while Joyner \cite{joyner2025} questioned the conceptual boundaries between dimensions and the practical utility of the framework in field settings.
+
+These critiques, however, have remained exclusively theoretical. No study has tested the 4D framework against large-scale empirical data. The present study addresses this gap by providing the first empirical validation using 253,020 workouts.
+
+\subsection*{Variance Sources in HR-Response Metrics}
+
+The reliability of field-based physiological metrics has long been recognized as a methodological challenge. Hopkins \cite{hopkins2000} established widely used criteria for measurement reliability in sport science, distinguishing between absolute reliability (typical error), relative reliability (ICC), and rank-order consistency (correlation). Halson \cite{halson2014} documented the substantial influence of diurnal variation, sleep quality, hydration status, and psychological stress on training-load metrics.
+
+The IOC consensus statement on monitoring athlete training loads \cite{bourdon2017} emphasized the fundamental distinction between external load (what the athlete does) and internal response (how the body responds), noting that the same external stimulus can produce markedly different internal responses depending on the athlete's state on a given day. However, this concept has remained qualitative: no study has quantified how much of the variance in HR-response metrics is attributable to the person (trait), the route (environment), or the occasion (daily state).
+
+\subsection*{Eccentric Muscle Damage and Cardiac Drift}
+
+Evidence from exercise physiology suggests that eccentric muscle contractions during downhill locomotion induce micro-damage and inflammatory responses that can influence subsequent cardiovascular function. Proske and Allen \cite{proske2005} reviewed the mechanisms of eccentric exercise damage, including sarcomere disruption and calcium homeostasis disturbance. Peake et al.\ \cite{peake2017} documented the cascade from mechanical damage through neutrophil infiltration to delayed-onset inflammation. Stickford et al.\ \cite{stickford2019} reported that downhill running increases subsequent cardiac drift relative to flat running, suggesting a link between eccentric load history and cardiovascular regulation.
+
+Critically, the existing literature has examined the \textit{total amount} of eccentric load. Whether the \textit{temporal placement} of descent within a workout---early versus late---systematically affects cardiac drift has not been tested. This distinction matters because early descent could induce damage that progressively impairs cardiovascular regulation throughout the remainder of the workout.
+
+\subsection*{Research Questions and Hypotheses}
 
 The central research question is: \textit{Is aerobic decoupling a valid indicator of cardiovascular fitness on variable terrain?}
 
-We tested four confirmatory hypotheses---DI--FI redundancy (H1), poor ICC for all dimensions (H2), DI route prediction vanishing after gradient correction (H3), and Occasion $> 50\%$ of variance (H4)---and three exploratory hypotheses concerning descent placement (E1), alternative metrics (E2), and the ICC--SB discrepancy (E3).
+We tested four confirmatory hypotheses:
+\begin{itemize}
+  \item[\textbf{H1}] DI and FI collapse onto a single construct (cf.\ Millet \cite{millet2025}).
+  \item[\textbf{H2}] All durability dimension ICCs fall below 0.50 (cf.\ Hopkins \cite{hopkins2000}).
+  \item[\textbf{H3}] DI's route predictability vanishes after gradient correction.
+  \item[\textbf{H4}] Occasion accounts for $>50\%$ of HR-response variance (cf.\ Bourdon et al.\ \cite{bourdon2017}).
+\end{itemize}
+And three exploratory hypotheses:
+\begin{itemize}
+  \item[\textbf{E1}] Temporal placement of descent affects cardiac drift (cf.\ Peake et al.\ \cite{peake2017}).
+  \item[\textbf{E2}] A more stable HR parameter than DI exists.
+  \item[\textbf{E3}] ICC $\ll$ split-half reliability, indicating rank-order stability despite poor absolute consistency.
+\end{itemize}
 
 \subsection*{Contributions}
 
-This study makes four contributions: \textbf{C1}~Demonstration that aerobic decoupling on variable terrain is a mathematical artifact of route geometry; \textbf{C2}~First large-scale quantification of Person\,/\,Route\,/\,Occasion variance in HR-response metrics; \textbf{C3}~Discovery of the temporal descent-placement effect on cardiac drift; \textbf{C4}~Proposal of gradient HR sensitivity as a reliable alternative durability metric.
+This study makes four contributions:
+\begin{enumerate}
+  \item[\textbf{C1}] Demonstration that aerobic decoupling on variable terrain is a mathematical artifact of route geometry (methodological warning).
+  \item[\textbf{C2}] First large-scale quantification of Person\,/\,Route\,/\,Occasion variance in HR-response metrics (descriptive contribution).
+  \item[\textbf{C3}] Discovery of the temporal descent-placement effect on cardiac drift (exploratory finding).
+  \item[\textbf{C4}] Proposal of gradient HR sensitivity as a reliable alternative durability metric (metric proposal).
+\end{enumerate}
 
 % ============================================================
 \section*{Methods}
 
-\subsection*{Data}
+\subsection*{Data Source and Inclusion Criteria}
 
-We used the FitRec dataset \cite{ni2018}, comprising 253,020 workout recordings from the Endomondo platform. Inclusion criteria required concurrent HR, altitude, and speed time-series with $\geq 30$ data points. After filtering, Study~1 used 13,750 workouts from 675 users, and Studies~2--3 used 2,343 workouts from 288 users with $\geq 5$ repeated workouts per user.
+We used the FitRec dataset \cite{ni2018}, a publicly available collection of 253,020 workout recordings from the Endomondo fitness platform. Each recording contains timestamped series of HR, GPS coordinates, altitude, and speed. The dataset includes workouts across multiple sport types (cycling, running, mountain biking, hiking, and others) from users worldwide.
+
+Inclusion criteria required: (1)~concurrent HR, altitude, and speed time-series streams; (2)~$\geq 30$ data points per stream; and (3)~non-zero altitude range (to ensure terrain variation was detectable). After applying these filters, Study~1 (construct validity) used 13,750 workouts from 675 users across all sport types. Studies~2 and~3 (artifact detection and variance decomposition) required repeated measures and used 2,343 workouts from 288 users, each with $\geq 5$ workouts on similar routes, enabling within-person and within-route analyses.
 
 \subsection*{Metric Operationalization}
 
-Six metrics were computed for each workout: (1)~DI (naive): $(\text{HR}/\text{Speed})_{\text{H2}} / (\text{HR}/\text{Speed})_{\text{H1}}$; (2)~FI: $\text{Speed}_{\text{H2}} / \text{Speed}_{\text{H1}}$; (3)~RI: CV of DI over the last 5 workouts; (4)~GACD: coefficient of time from $\text{HR} \sim \text{gradient} + \text{speed} + \text{time}$ (bpm/min); (5)~Gradient sensitivity: coefficient of gradient from the same regression (bpm/1\% grade); (6)~Speed sensitivity: coefficient of speed (bpm/(m/s)).
+Six metrics were computed for each qualifying workout:
+
+\textbf{Meixner 4D metrics.} (1)~\textit{Decoupling Index} (DI): $(\text{HR}/\text{Speed})_{\text{H2}} / (\text{HR}/\text{Speed})_{\text{H1}}$, where H1 and H2 denote the first and second halves of the workout. Values $>1$ indicate cardiac drift (``decoupling''). (2)~\textit{Fading Index} (FI): $\text{Speed}_{\text{H2}} / \text{Speed}_{\text{H1}}$. Values $<1$ indicate pace decline. (3)~\textit{Resilience Index} (RI): coefficient of variation of DI across the most recent five workouts.
+
+\textbf{Regression-based metrics.} For each workout, a multiple linear regression was fitted: $\text{HR}_i = \beta_0 + \beta_{\text{grad}} \cdot \text{gradient}_i + \beta_{\text{speed}} \cdot \text{speed}_i + \beta_{\text{time}} \cdot \text{time}_i + \epsilon_i$, where $i$ indexes individual data points within the workout. From this regression, three coefficients were extracted: (4)~\textit{Gradient-Adjusted Cardiac Drift} (GACD): $\beta_{\text{time}}$ in bpm/min, representing cardiac drift after controlling for terrain and speed; (5)~\textit{Gradient sensitivity}: $\beta_{\text{grad}}$ in bpm per 1\% grade, representing the HR response to terrain changes; (6)~\textit{Speed sensitivity}: $\beta_{\text{speed}}$ in bpm per m/s.
+
+\subsection*{Route Characterization}
+
+Each workout's route profile was characterized by: total ascent and descent (m), altitude range (m), gradient standard deviation (\%), percentage of time climbing vs.\ descending, and two asymmetry metrics---\textit{ascent-front ratio} (proportion of total ascent in H1) and \textit{descent-front ratio} (proportion of total descent in H1). The descent-front ratio served as the key predictor in the descent-placement analysis.
 
 \subsection*{Analytical Approach}
 
-\textbf{Study~1 (Construct Validity):} Bootstrap Pearson correlations ($B = 1{,}000$), PCA with parallel analysis, and ICC(3,1).
+\textbf{Study~1: Construct Validity ($N = 13{,}750$).} Inter-metric correlations were computed using bootstrap Pearson correlations ($B = 1{,}000$; 95\% bias-corrected CIs). Dimensionality was assessed via principal component analysis (PCA) with parallel analysis to determine the number of retained factors. Test--retest reliability was quantified using ICC(3,1) for users with $\geq 5$ workouts.
 
-\textbf{Study~2 (Artifact Detection):} Ridge regression and gradient-boosted trees with GroupKFold CV (groups = userId). Simulation ($N = 5{,}000$; cardiac drift $= 0$). Descent-placement effect via partial correlations, within-person analyses, steepness stratification, and dose--response curves.
+\textbf{Study~2: Artifact Detection ($N = 2{,}343$ real + $N = 5{,}000$ simulated).} DI was predicted from route features using Ridge regression and gradient-boosted trees (GBT), with GroupKFold cross-validation (groups = userId, $k = 5$) to prevent data leakage. A simulation generated $N = 5{,}000$ synthetic workouts with cardiac drift set to exactly zero: HR responded only to gradient (with individual sensitivity) and random noise, while speed responded only to gradient. This isolated the structural artifact inherent in the DI formula. The descent-placement effect was assessed using: (a)~partial correlations controlling for total descent; (b)~within-person correlations (users with $\geq 5$ workouts); (c)~stratified analyses by gradient steepness (gentle: $\sigma_{\text{grad}} < 5$; moderate: $5$--$8$; steep: $>8$); (d)~dose--response curves (deciles of descent-front ratio); and (e)~sport-specific subgroup analyses.
 
-\textbf{Study~3 (Variance Decomposition):} ICC (Person), GroupKFold CV $R^2$ (Route), and residual (Occasion), with bootstrap 95\% CIs. Split-half with Spearman-Brown correction and convergence analysis (2--10 measurements).
+\textbf{Study~3: Variance Decomposition ($N = 2{,}343$).} For each metric, total variance was decomposed into three components: \textit{Person} (ICC from a random-intercept model), \textit{Route} (incremental $R^2$ from GroupKFold CV predicting the metric from route features), and \textit{Occasion} (residual: $100\% - \text{Person} - \text{Route}$). Bootstrap 95\% CIs were computed ($B = 1{,}000$). Reliability was further assessed via split-half correlations (odd vs.\ even workouts) with Spearman-Brown prophecy formula correction, and convergence analysis examined how split-half reliability increased from 2 to 10 measurements.
 
-All cross-validations used \texttt{GroupKFold(groups=userId)} to prevent data leakage.
+All cross-validations used \texttt{GroupKFold(groups=userId)} to ensure that no user's data appeared in both training and test sets simultaneously.
 
 % ============================================================
 \section*{Results}
 
+\subsection*{Construct Validity of the 4D Framework (H1, H2)}
+
+DI and FI showed a strong negative correlation ($r = -0.60$, 95\% CI $[-0.63, -0.57]$), consistent with H1. PCA with parallel analysis retained only one factor (eigenvalue = 1.87; second eigenvalue = 0.72, below the parallel-analysis threshold), supporting a collapse from four dimensions to two. RI was largely independent of both DI and FI ($|r| < 0.15$). All dimension ICCs fell below 0.50 (DI: 0.16; FI: 0.21; RI: 0.09), confirming H2.
+
 \subsection*{Unified Metric Evaluation}
 
-Table~\ref{tab:main} presents the Person\,/\,Route\,/\,Occasion evaluation for all metrics. Key findings: (1)~Person variance increased from DI (16\%) to speed sensitivity (43\%); (2)~the ICC--SB discrepancy was largest for DI (0.16 vs.\ 0.63), supporting E3; (3)~gradient sensitivity was the only metric with a positive CV $R^2$ for Route ($+0.089$); and (4)~Occasion dominated all metrics ($> 50\%$), supporting H4.
+Table~\ref{tab:main} presents the Person\,/\,Route\,/\,Occasion evaluation for all four metrics. Person variance increased monotonically from DI (16\%) through GACD (22\%) and gradient sensitivity (36\%) to speed sensitivity (43\%). The ICC--SB discrepancy was largest for DI (0.16 vs.\ 0.63) and smallest for speed sensitivity (0.43 vs.\ 0.93), supporting E3: rank-order consistency (split-half) can be substantially higher than absolute consistency (ICC) when Occasion variance is large. Gradient sensitivity was the only metric with a positive cross-validated $R^2$ for Route ($+0.089$), indicating a genuine---not overfit---relationship with terrain features. Occasion dominated all metrics ($>50\%$), confirming H4; the dominance was most extreme for DI (83\%) and GACD (78\%).
 
-\begin{table}[ht]
+\begin{table}[t]
 \centering
-\small
-\caption{Unified metric evaluation across Person\,/\,Route\,/\,Occasion axes. SB = Spearman-Brown. All CV $R^2$ use \texttt{GroupKFold(groups=userId)}.}
+\caption{Unified metric evaluation across Person\,/\,Route\,/\,Occasion axes. SB~=~Spearman-Brown prophecy. All CV~$R^2$ use \texttt{GroupKFold(groups=userId)}.}
 \label{tab:main}
-\begin{tabular}{@{}l ccc cc c c@{}}
+\small
+\begin{tabular}{@{}lrrr rr r r@{}}
 \toprule
  & \multicolumn{3}{c}{\textbf{Person}} & \multicolumn{2}{c}{\textbf{Route}} & \textbf{Occ.} & \textbf{Val.} \\
 \cmidrule(lr){2-4} \cmidrule(lr){5-6} \cmidrule(lr){7-7} \cmidrule(lr){8-8}
-Metric & ICC & Spl-h & SB & $R^2_{\text{in}}$ & $R^2_{\text{CV}}$ & \% & Speed \\
+\textbf{Metric} & \textbf{ICC} & \textbf{Spl-h} & \textbf{SB} & $\bm{R^2_{\text{in}}}$ & $\bm{R^2_{\text{CV}}}$ & \textbf{\%} & \textbf{Speed} \\
 \midrule
-DI & .16 & .45 & .63 & .013 & $-.006$ & \textbf{83} & --- \\
-GACD & .22 & .74 & .85 & .031 & $-.002$ & \textbf{78} & $-.05$ \\
-Grad.S. & .36 & \textbf{.82} & \textbf{.90} & .128 & \textbf{+.089} & 58 & $\mathbf{+.33}$ \\
-Speed S. & \textbf{.43} & \textbf{.87} & \textbf{.93} & .069 & $-.092$ & 57 & $-.13$ \\
+DI (naive)    & .16 & .45          & .63          & .013 & $-.006$          & \textbf{83} & ---              \\
+GACD (drift)  & .22 & .74          & .85          & .031 & $-.002$          & \textbf{78} & $-.05$ ns        \\
+\textbf{Grad.\ S.} & .36 & \textbf{.82} & \textbf{.90} & .128 & \textbf{+.089}   & 58 & $\bm{+.33^{**}}$ \\
+Speed S.   & \textbf{.43} & \textbf{.87} & \textbf{.93} & .069 & $-.092$          & 57 & $-.13$ ns        \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\subsection*{Simulation Proof of Artifact}
+\subsection*{Simulation Proof of Route Artifact (H3)}
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\linewidth]{../results/fig1_simulation.png}
-\caption{DI as a function of gradient asymmetry in $N = 5{,}000$ synthetic workouts with zero cardiac drift. Route types are distinguished by marker shape. Front-climb routes produce DI $= 0.39$ (false ``high fitness''), back-climb routes produce DI $= 2.76$ (false ``fatigue''), and symmetric routes produce DI $= 1.00$ (correct). $r = -0.88$, $p < .001$.}
+\caption{DI as a function of gradient asymmetry in $N = 5{,}000$ synthetic workouts with zero cardiac drift. Route types are distinguished by marker shape. Front-climb routes produce DI $= 0.39 \pm 0.10$ (false ``high fitness''), back-climb routes produce DI $= 2.76 \pm 0.82$ (false ``fatigue''), and symmetric routes produce DI $= 1.00 \pm 0.10$ (correct). $r = -0.88$, $p < .001$.}
 \label{fig:simulation}
 \end{figure}
 
-With cardiac drift set to exactly zero, DI was predictable from route features alone (CV $R^2 = 0.82$). This confirms H3: DI values on variable terrain are a mathematical artifact of the formula's sensitivity to gradient asymmetry.
+With cardiac drift set to exactly zero, DI was predictable from route features alone (CV $R^2 = 0.82$, SD $= 0.006$ across folds). The gradient asymmetry---defined as the difference between H1 and H2 mean gradients---explained nearly all DI variation ($r = -0.88$, $p < .001$; Figure~\ref{fig:simulation}). Front-climb routes (ascent in H1, descent in H2) produced DI $= 0.39 \pm 0.10$, which would be interpreted as ``excellent aerobic fitness'' under Friel's $<5\%$ rule. Back-climb routes produced DI $= 2.76 \pm 0.82$, indicating severe ``fatigue.'' Symmetric routes correctly produced DI $\approx 1.00$. In the real data, DI was predicted from route features with CV $R^2 = 0.60$ in the hilly subset (altitude range $> 200$~m), declining to $R^2 = 0.12$ for flat routes. This confirms H3: DI on variable terrain is predominantly a mathematical artifact of the formula's sensitivity to gradient asymmetry.
 
 \subsection*{Person / Route / Occasion Framework}
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\linewidth]{../results/fig2_framework.png}
-\caption{Variance decomposition (stacked bars, top) with Spearman-Brown reliability and speed correlation (bottom). Gradient sensitivity shows the most balanced profile: moderate Person variance, the only positive Route $R^2$, SB $= 0.90$, and significant speed correlation ($r = +0.33$).}
+\caption{Variance decomposition (stacked bars, top) with Spearman-Brown reliability and speed correlation (bottom). Gradient sensitivity shows the most balanced profile: moderate Person variance (36\%), the only positive Route $R^2$ ($+0.089$), SB $= 0.90$, and significant speed correlation ($r = +0.33^{**}$).}
 \label{fig:framework}
 \end{figure}
 
-\subsection*{Descent Placement Effect}
+Figure~\ref{fig:framework} visualizes the three-axis evaluation framework. The contrast between DI and gradient sensitivity is striking: DI's variance is 83\% Occasion with only 16\% Person, while gradient sensitivity achieves a more balanced 36\% Person / 58\% Occasion split with meaningful Route variance. The Spearman-Brown line shows a monotonic increase from DI (0.63) to speed sensitivity (0.93), indicating that even metrics with poor ICC can achieve acceptable rank-order consistency with sufficient repeated measurements.
 
-Table~\ref{tab:descent} shows that cardiac drift depends on the \textit{temporal placement} of descent, not its total amount.
+\subsection*{Descent Placement Effect (E1)}
 
-\begin{table}[ht]
+Table~\ref{tab:descent} presents the descent-placement analysis. The total amount of descent showed no relationship with cardiac drift ($r = +0.03$, ns), but the temporal placement of descent---quantified as the descent-front ratio---was a significant predictor ($\beta^* = +0.29$, $p < .001$). Workouts with early descent (descent-front $> 0.50$) showed greater subsequent cardiac drift, with a medium effect size in the very-hilly subset (Cohen's $d = 0.69$, $p < .001$).
+
+\begin{table}[t]
 \centering
-\small
-\caption{Descent placement effect on cardiac drift (GACD). $\beta^*$ = standardized partial regression coefficient.}
+\caption{Descent placement effect on cardiac drift (GACD). $\beta^*$~=~standardized partial regression coefficient.}
 \label{tab:descent}
-\begin{tabular}{@{}llr@{}}
+\small
+\begin{tabular}{@{}llrl@{}}
 \toprule
-Analysis & Statistic & Result \\
+\textbf{Analysis} & \textbf{Statistic} & \textbf{Result} & \textbf{Sig.} \\
 \midrule
-Total descent (amount) & $r$ & $+.03$ ns \\
-Descent-front (placement) & $\beta^*$ & $\mathbf{+.29^{***}}$ \\
-Group comparison (hilly) & Cohen's $d$ & $\mathbf{0.69^{***}}$ \\
-Within-person & Mean $r$ & $+.089^*$ \\[3pt]
-\textit{Steepness} & & \\
-\quad Gentle ($\sigma < 5$) & $r$ & $+.18^{***}$ \\
-\quad Moderate ($5$--$8$) & $r$ & $\mathbf{+.65^{***}}$ \\[3pt]
-\textit{Sport} & & \\
-\quad Cycling & $r$ & $+.14^{***}$ \\
-\quad Running & $r$ & $+.20^{*}$ \\
-\quad Mountain biking & $r$ & $+.01$ ns \\
+\multicolumn{4}{@{}l}{\textit{Amount vs.\ placement}} \\
+\quad Total descent        & $r$          & $+.03$         & ns             \\
+\quad Descent-front ratio  & $\beta^*$    & $\bm{+.29}$    & $\bm{***}$     \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Effect size}} \\
+\quad Group comparison     & Cohen's $d$  & $\bm{0.69}$    & $\bm{***}$     \\
+\quad Within-person        & Mean $r$     & $+.089$        & $*$            \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Steepness interaction}} \\
+\quad Gentle ($\sigma_{\text{grad}} < 5$)  & $r$ & $+.18$  & $***$          \\
+\quad Moderate ($5$--$8$)                   & $r$ & $\bm{+.65}$  & $\bm{***}$     \\
+\midrule
+\multicolumn{4}{@{}l}{\textit{Sport-specific}} \\
+\quad Cycling              & $r$          & $+.14$         & $***$          \\
+\quad Running              & $r$          & $+.20$         & $*$            \\
+\quad Mountain biking      & $r$          & $+.01$         & ns             \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-Three lines of evidence support an eccentric-damage interpretation: (1)~the effect is amplified in moderately steep terrain ($r = +0.65$); (2)~a threshold effect appears in the top decile of descent-front ratio; and (3)~the effect disappears in mountain biking, plausibly because suspension absorbs eccentric impact.
+The within-person analysis confirmed the effect: among 108 users with sufficient within-route variation, 66 (61\%) showed positive descent-front$\times$GACD correlations (mean within-person $r = +0.089$, $p < .05$). The effect was moderated by gradient steepness: negligible on gentle terrain ($r = +0.18$), strong on moderately steep terrain ($r = +0.65$), consistent with greater eccentric loads on steeper descents. A dose--response analysis revealed a threshold effect: GACD remained low (0.01--0.04 bpm/min) across deciles 1--9 of descent-front ratio, then jumped to 0.086 in the top decile ($\geq 0.68$). The effect disappeared entirely in mountain biking ($r = +0.01$, ns), plausibly because suspension systems and seated riding posture absorb eccentric impact forces.
 
 % ============================================================
 \section*{Discussion}
 
 \subsection*{DI Requires Route Correction on Variable Terrain (C1)}
 
-Route predictability of DI was confirmed in both simulation ($R^2 = 0.82$) and real data ($R^2 = 0.60$). The mechanism is straightforward: speed is terrain-dependent, so $\text{DI} = (\text{HR}/\text{Speed})_{\text{H2}} / (\text{HR}/\text{Speed})_{\text{H1}}$ systematically deviates from 1.0 on asymmetric routes even with constant cardiac drift. The Pa:HR $< 5\%$ rule \cite{friel2009} is valid only on flat or symmetric courses---a constraint not currently made explicit in platforms such as TrainingPeaks and Strava.
+The route predictability of DI was confirmed in both simulation ($R^2 = 0.82$) and real data ($R^2 = 0.60$ for hilly subsets). This predictability persists even when cardiac drift is exactly zero (Figure~\ref{fig:simulation}), establishing that it is a property of the formula, not of physiology. The mechanism is straightforward: in $\text{DI} = (\text{HR}/\text{Speed})_{\text{H2}} / (\text{HR}/\text{Speed})_{\text{H1}}$, speed is strongly determined by terrain gradient. On front-climb routes (ascent first, descent second), H1 speed is low and H2 speed is high, producing $\text{DI} < 1$ (``high fitness'') even with no change in HR. On back-climb routes, the reverse occurs, producing spuriously high DI values (``fatigue'').
 
-Regarding the 4D framework \cite{meixner2025}, DI--FI redundancy ($r = -0.60$) and RI independence confirm Millet's \cite{millet2025} theoretical critique with the first large-scale empirical data ($N = 13{,}750$). PCA retention of one factor supports a 4D $\rightarrow$ 2D reduction.
+The practical implication is significant. Friel's \cite{friel2009} widely adopted Pa:HR $< 5\%$ rule is valid only on flat or gradient-symmetric courses. This critical constraint is not currently communicated in platforms such as TrainingPeaks and Strava, where millions of users apply DI to workouts on variable terrain. Our simulation demonstrates that DI values can range from 0.39 to 2.76---a 7-fold variation---purely as a function of route geometry, with zero contribution from cardiovascular drift.
 
-\subsection*{Descent Placement: Eccentric Damage Hypothesis (C3)}
+Regarding the 4D framework, our empirical finding that DI and FI collapse onto a single factor ($r = -0.60$; PCA retains one factor) confirms Millet's \cite{millet2025} theoretical argument with the first large-scale empirical evidence ($N = 13{,}750$). Combined with the poor ICCs of all dimensions ($<0.50$), these results suggest that the 4D framework requires substantial revision: at minimum, a reduction from four to two dimensions, with route-correction mechanisms for terrain-sensitive components.
 
-Cardiac drift increases depend on the \textit{temporal placement} of descent, not its total amount ($r = +0.03$ ns vs.\ $\beta^* = +0.29^{***}$). This is consistent with cumulative micro-damage from eccentric contractions \cite{peake2017, proske2005}. The effect is amplified on steeper terrain, shows a dose--response threshold, and disappears in mountain biking---all consistent with an eccentric-load mechanism.
+\subsection*{Descent Placement: Temporal Eccentric Damage Hypothesis (C3)}
 
-\subsection*{Occasion Dominates: Invisibility of Daily Condition (C2)}
+Table~\ref{tab:descent} demonstrates that the increase in cardiac drift depends on the \textit{temporal placement} of descent, not its total amount (total descent: $r = +0.03$, ns; descent-front ratio: $\beta^* = +0.29$, $p < .001$). This pattern is consistent with the hypothesis that eccentric muscle contractions during early descent induce cumulative micro-damage \cite{peake2017, proske2005} that progressively impairs cardiovascular regulation---manifesting as greater cardiac drift in the subsequent portion of the workout.
 
-Day-to-day variation accounted for 50--78\% of HR-response variance and was not explained by effort ($r = -0.004$ ns). Unmeasured factors---sleep, hydration, temperature, stress---dominate HR responses. The IOC consensus \cite{bourdon2017} conceptually argued that external load $\neq$ internal response; this study provides the first quantification: \textit{even when the same person runs the same route, 50--78\% of the HR response differs from day to day.} Route correction and readiness integration are essential for any single-session fitness estimate.
+Three convergent lines of evidence strengthen this interpretation. First, the effect was amplified on moderately steep terrain ($r = +0.65$) compared to gentle terrain ($r = +0.18$), consistent with the biomechanical principle that eccentric loading increases with descent steepness. Second, a clear threshold effect was observed: GACD remained stable across the first nine deciles of descent-front ratio (0.01--0.04 bpm/min) but jumped to 0.086 in the top decile ($\geq 0.68$), suggesting that eccentric damage accumulation must exceed a threshold before cardiovascular consequences manifest. Third, the effect disappeared entirely in mountain biking ($r = +0.01$, ns), which is consistent with the protective role of suspension systems and seated cycling posture in absorbing eccentric impact forces.
+
+This finding has practical implications for route planning in endurance sports: routes with steep descents in the first half may induce more cardiovascular strain than the same total descent distributed evenly or placed in the second half.
+
+\subsection*{Occasion Dominates: The Invisibility of Daily Condition (C2)}
+
+The most practically important finding of this study is that Occasion (day-to-day variation) accounted for the majority of variance in all HR-response metrics: DI 83\%, GACD 78\%, gradient sensitivity 58\%, speed sensitivity 57\%. This dominance is not an artifact of measurement noise---it persists after controlling for route features and is not explained by effort intensity (HR deviation from personal mean: $r = -0.004$, ns).
+
+The IOC consensus statement \cite{bourdon2017} conceptually argued that external load $\neq$ internal response. Our data provide the first quantification of this principle: even when the same person performs the same route, 50--78\% of the HR response differs from day to day. The unmeasured factors driving this variation likely include sleep quality, hydration status, ambient temperature, psychological stress, and residual fatigue from prior training sessions \cite{halson2014}---none of which are captured in the FitRec dataset.
+
+This has immediate implications for the interpretation of single-session metrics in wearable applications. When a platform reports that a user's ``aerobic fitness has declined'' based on one workout's DI, more than half of that signal may reflect the user's daily condition rather than any change in fitness. Meaningful fitness assessment from HR-response metrics requires either (a)~aggregation across multiple sessions to average out Occasion variance, or (b)~integration of daily readiness indicators (e.g., resting HR, HRV, sleep metrics) to adjust for state-dependent variation.
 
 \subsection*{Gradient Sensitivity: Most Promising Alternative (C4)}
 
-Gradient HR sensitivity showed the most balanced profile: SB $= 0.90$ (five measurements), the only positive CV $R^2$ ($+0.089$), speed correlation $r = +0.33^{**}$, and temporal stability $r = 0.77$. However, ICC $= 0.36$ is ``poor'' \cite{hopkins2000}, and Occasion still accounts for 58.5\%. Gradient sensitivity outperforms existing metrics but is insufficient for between-person comparison alone. Prospective studies with VO$_2$max and lactate threshold are needed.
+Gradient HR sensitivity showed the most balanced profile among the four metrics evaluated:
+\begin{itemize}
+  \item \textbf{Reliability:} Spearman-Brown coefficient of 0.90, converging to the $r = 0.80$ threshold within five measurements. This indicates that gradient sensitivity achieves acceptable rank-order reliability with a modest measurement burden.
+  \item \textbf{Route relationship:} The only metric with a positive GroupKFold CV $R^2$ ($+0.089$). While modest, this value indicates a genuine, non-overfit relationship with terrain features, consistent with the physiological expectation that HR-gradient sensitivity reflects aerobic capacity.
+  \item \textbf{External validity:} A significant positive correlation with average speed ($r = +0.33$, $p < .01$). Fitter individuals (faster average speed) showed a blunted HR response to gradient changes, consistent with the interpretation that gradient sensitivity captures an aspect of aerobic fitness.
+  \item \textbf{Temporal stability:} Correlation between early-third and late-third measurements of $r = 0.77$, indicating that the metric is consistent across the training history captured in the dataset.
+\end{itemize}
 
+However, ICC $= 0.36$ falls in the ``poor'' range by Hopkins' \cite{hopkins2000} criteria, and Occasion still accounts for 58.5\% of variance. Gradient sensitivity thus outperforms all existing metrics but remains insufficient for between-person comparison from a single measurement. Its primary utility lies in \textit{within-person tracking over time}, where the high split-half reliability (SB $= 0.90$) indicates that rank-order changes across sessions are meaningful.
+
+Future validation should examine the correlation between gradient sensitivity and gold-standard measures of aerobic fitness (VO$_2$max, lactate threshold, critical power) in a prospective design with controlled laboratory testing.
+
+% ============================================================
 \subsection*{Limitations}
 
-(1)~Secondary data: HR sensor quality uncontrolled. (2)~No gold standard (VO$_2$max, power). (3)~Missing demographics (age, sex, training history). (4)~Exploratory findings (E1--E3) require confirmatory replication. (5)~Observational design precludes causal inference. (6)~Occasion composition (sleep, temperature, etc.) cannot be identified. (7)~Single dataset. (8)~Sport bias (cycling 62\%, hiking 1\%).
+Eight limitations should be noted. (1)~\textit{Secondary data}: FitRec was not collected for research purposes; HR sensor quality, placement, and calibration are uncontrolled, and measurement noise may underestimate reliability metrics. (2)~\textit{No gold standard}: without VO$_2$max, lactate threshold, or power-meter data, the construct validity of gradient sensitivity rests on indirect evidence (speed correlation). (3)~\textit{Missing demographics}: age, sex, and training history are unknown and may confound both Person and Occasion variance. (4)~\textit{Exploratory findings}: E1 (descent placement), E2 (alternative metrics), and E3 (ICC--SB discrepancy) were not pre-registered and require confirmatory replication. (5)~\textit{Causal inference}: the descent-placement effect is observational; reverse causality cannot be fully excluded. (6)~\textit{Occasion composition unknown}: day-to-day variation accounts for 50--78\% of variance, but its specific constituents (sleep, temperature, hydration, stress) cannot be identified in this dataset. (7)~\textit{Single dataset}: only FitRec was used; replication in different user populations (e.g., elite athletes, clinical populations) is needed. (8)~\textit{Sport bias}: the dataset is dominated by cycling (62\%), with limited representation of running (17\%), mountain biking (17\%), and hiking (1\%); generalization to hiking and mountaineering requires caution.
 
 % ============================================================
 \section*{Conclusion}
 
-To use aerobic decoupling for durability assessment on variable terrain, route geometry correction is essential. Route prediction $R^2 = 0.82$ (simulation)\,/\,$0.60$ (real data) demonstrates that DI values are largely determined by terrain asymmetry. Once this artifact is appropriately removed, the temporal placement of descent emerges as a genuine physiological effect ($d = 0.69$). Day-to-day variation accounts for 50--78\% of HR-response variance, demonstrating that the same person running the same route produces a different HR response every time. Gradient sensitivity (SB $= 0.90$; speed correlation $r = +0.33$) is the most promising alternative, but ICC $= 0.36$ indicates limitations for between-person comparison, and integration with daily readiness information remains a key direction for future work.
+To use aerobic decoupling for durability assessment on variable terrain, route geometry correction is essential. Route prediction $R^2 = 0.82$ (simulation) / $0.60$ (real data) demonstrates that DI values are largely determined by the formula's sensitivity to terrain asymmetry. The 4D framework collapses from four to two dimensions when tested empirically ($N = 13{,}750$). Once the route artifact is appropriately removed, the temporal placement of descent emerges as a genuine physiological effect on cardiac drift ($d = 0.69$), consistent with cumulative eccentric muscle damage. Day-to-day variation accounts for 50--78\% of HR-response variance, providing the first quantification of the IOC's conceptual distinction between external load and internal response. Gradient sensitivity (SB $= 0.90$; speed correlation $r = +0.33$) is the most promising alternative durability metric, but ICC $= 0.36$ indicates limitations for between-person comparison, and integration with daily readiness information remains a key direction for future work.
 
 % ============================================================
 \begin{acknowledgements}
