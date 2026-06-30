@@ -27,18 +27,14 @@ np.random.seed(42)
 # ============================================================
 # データ読み込み
 # ============================================================
-# 相対パスを優先し，フォールバックとして絶対パスを使用する
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR_REL = os.path.join(SCRIPT_DIR, "data")
-DATA_DIR_ABS = "/Users/hisashi/Desktop/Workspace/Yamap_GPX/data/fitrec"
+DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 
-if os.path.isdir(DATA_DIR_REL):
-    DATA_DIR = DATA_DIR_REL
-else:
-    DATA_DIR = DATA_DIR_ABS
+if not os.path.isdir(DATA_DIR):
+    print(f"ERROR: data directory not found: {DATA_DIR}", file=sys.stderr)
+    sys.exit(1)
 
 abc_path = os.path.join(DATA_DIR, "abc_metrics.csv")
-meixner_path = os.path.join(DATA_DIR, "meixner_4d_indices.csv")
 
 if not os.path.exists(abc_path):
     print(f"ERROR: {abc_path} not found.", file=sys.stderr)
@@ -404,7 +400,7 @@ for n_agg in [2, 3, 5, 7, 10]:
 
     for uid, group in sub.groupby("userId"):
         vals = group["value"].values
-        np.random.shuffle(vals)
+        vals = np.random.permutation(vals)
         group1_means.append(vals[:n_agg].mean())
         group2_means.append(vals[n_agg:2 * n_agg].mean())
 

@@ -26,13 +26,12 @@ from sklearn.preprocessing import StandardScaler
 # データパスの設定
 # ---------------------------------------------------------------------------
 _BASE = os.path.dirname(__file__)
-_MEIXNER_REL = os.path.join(_BASE, "data", "meixner_4d_indices.csv")
-_MEIXNER_ABS = "/Users/hisashi/Desktop/Workspace/Yamap_GPX/data/fitrec/meixner_4d_indices.csv"
-MEIXNER_PATH = _MEIXNER_REL if os.path.exists(_MEIXNER_REL) else _MEIXNER_ABS
-
-_ABC_REL = os.path.join(_BASE, "data", "abc_metrics.csv")
-_ABC_ABS = "/Users/hisashi/Desktop/Workspace/Yamap_GPX/data/fitrec/abc_metrics.csv"
-ABC_PATH = _ABC_REL if os.path.exists(_ABC_REL) else _ABC_ABS
+MEIXNER_PATH = os.path.join(_BASE, "data", "meixner_4d_indices.csv")
+ABC_PATH = os.path.join(_BASE, "data", "abc_metrics.csv")
+for _p in (MEIXNER_PATH, ABC_PATH):
+    if not os.path.exists(_p):
+        print(f"ERROR: data file not found: {_p}", file=sys.stderr)
+        sys.exit(1)
 
 np.random.seed(42)
 
@@ -121,7 +120,8 @@ for i, aid in enumerate(abc["id"]):
     abc_route_by_id[aid] = vals
 
 # 結合: meixner DI + abc route features
-X_rich = []; y_rich = []; X_hilly_list = []; y_hilly_list = []
+X_rich = []; y_rich = []; uid_rich = []
+X_hilly_list = []; y_hilly_list = []; uid_hilly = []
 for i, mid in enumerate(meixner_ids):
     if mid in abc_route_by_id:
         try:
@@ -134,11 +134,14 @@ for i, mid in enumerate(meixner_ids):
         feats = abc_route_by_id[mid]
         if any(np.isnan(f) for f in feats):
             continue
+        # Collect features, target, AND userId in lockstep
         X_rich.append(feats)
         y_rich.append(di_val)
+        uid_rich.append(meixner["userId"][i])
         if np.isfinite(ar_val) and ar_val > 500:
             X_hilly_list.append(feats)
             y_hilly_list.append(di_val)
+            uid_hilly.append(meixner["userId"][i])
 
 X_rich = np.array(X_rich, dtype=np.float64)
 y_rich = np.array(y_rich, dtype=np.float64)
@@ -151,11 +154,8 @@ if len(X_rich) > 30:
     model_a.fit(X_s, y_rich)
     di_route_r2_all = model_a.score(X_s, y_rich)
     # GroupKFold: 同一ユーザーの train/test 混在を防止
-    uid_rich = [meixner["userId"][i] for i, mid in enumerate(meixner_ids) if mid in abc_route_by_id
-                and np.isfinite(float(meixner["DI"][i]) if meixner["DI"][i] not in ('','nan') else float('nan'))
-                and mid in abc_route_by_id and not any(np.isnan(f) for f in abc_route_by_id[mid])]
     uid_map_a = {u: j for j, u in enumerate(sorted(set(uid_rich)))}
-    groups_a = np.array([uid_map_a[u] for u in uid_rich[:len(X_rich)]])
+    groups_a = np.array([uid_map_a[u] for u in uid_rich])
     gkf_a = GroupKFold(n_splits=min(5, len(set(groups_a))))
     cv_a = cross_val_score(Ridge(alpha=1.0), X_s, y_rich, cv=gkf_a, groups=groups_a, scoring="r2")
     di_route_r2_cv_all = np.mean(cv_a)
@@ -168,22 +168,7 @@ from sklearn.ensemble import GradientBoostingRegressor
 if len(X_hilly_list) > 30:
     X_h = np.array(X_hilly_list, dtype=np.float64)
     y_h = np.array(y_hilly_list, dtype=np.float64)
-    # Build user groups for hilly subset
-    uid_hilly = []
-    for i, mid in enumerate(meixner_ids):
-        if mid in abc_route_by_id:
-            try:
-                di_val = float(meixner["DI"][i])
-                ar_val = float(meixner["alt_range"][i])
-            except (ValueError, TypeError):
-                continue
-            if not np.isfinite(di_val):
-                continue
-            feats = abc_route_by_id[mid]
-            if any(np.isnan(f) for f in feats):
-                continue
-            if np.isfinite(ar_val) and ar_val > 500:
-                uid_hilly.append(meixner["userId"][i])
+    # uid_hilly already collected in lockstep with X_hilly_list
     uid_map_h = {u: j for j, u in enumerate(sorted(set(uid_hilly)))}
     groups_h = np.array([uid_map_h[u] for u in uid_hilly])
     scaler_h = StandardScaler()

@@ -23,9 +23,10 @@ from scipy import stats
 # ---------------------------------------------------------------------------
 # データ読み込み
 # ---------------------------------------------------------------------------
-_REL_PATH = os.path.join(os.path.dirname(__file__), "data", "meixner_4d_indices.csv")
-_ABS_PATH = "/Users/hisashi/Desktop/Workspace/Yamap_GPX/data/fitrec/meixner_4d_indices.csv"
-DATA_PATH = _REL_PATH if os.path.exists(_REL_PATH) else _ABS_PATH
+DATA_PATH = os.path.join(os.path.dirname(__file__), "data", "meixner_4d_indices.csv")
+if not os.path.exists(DATA_PATH):
+    print(f"ERROR: data file not found: {DATA_PATH}", file=sys.stderr)
+    sys.exit(1)
 
 
 def load_data(path: str) -> dict:

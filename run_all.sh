@@ -57,7 +57,7 @@ echo ""
 # Step 0: Dependencies
 # ============================================================
 echo "--- Step 0: Check dependencies ---"
-python3 -c 'import numpy, scipy, sklearn, pandas' 2>/dev/null || {
+python3 -c 'import numpy, scipy, sklearn, pandas, matplotlib' 2>/dev/null || {
     echo "Installing Python dependencies..."
     pip3 install -r requirements.txt
 }

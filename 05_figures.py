@@ -150,18 +150,30 @@ def generate_figure2():
         os.path.join(RESULTS_DIR, "study3.txt"),
     )
 
+    REQUIRED_KEYS = [
+        "pct_person_gacd", "pct_route_gacd", "pct_occasion_gacd",
+        "pct_person_gradsens", "pct_route_gradsens", "pct_occasion_gradsens",
+        "pct_person_speedsens", "pct_route_speedsens", "pct_occasion_speedsens",
+        "sb_di", "sb_gradsens", "sb_speedsens",
+        "speed_corr_gradsens",
+    ]
+    missing = [k for k in REQUIRED_KEYS if k not in keys]
+    if missing:
+        print(f"WARNING: missing keys from results (using fallback): {missing}",
+              file=sys.stderr)
+
     metrics = [
-        {"name": "DI\n(naive)",   "person": 16.3, "route": 0.0,
+        {"name": "DI\n(naive)",   "person": keys.get("icc_di", 16.3), "route": 0.0,
          "occasion": 83.7, "sb": keys.get("sb_di", 0.63), "speed_r": None},
         {"name": "GACD\n(drift)", "person": keys.get("pct_person_gacd", 21.9),
          "route": keys.get("pct_route_gacd", 0.0), "occasion": keys.get("pct_occasion_gacd", 78.1),
-         "sb": 0.85, "speed_r": -0.05},
+         "sb": keys.get("sb_gacd", 0.85), "speed_r": keys.get("speed_corr_gacd", -0.05)},
         {"name": "Gradient\nSensitivity", "person": keys.get("pct_person_gradsens", 35.8),
          "route": keys.get("pct_route_gradsens", 5.7), "occasion": keys.get("pct_occasion_gradsens", 58.5),
          "sb": keys.get("sb_gradsens", 0.90), "speed_r": keys.get("speed_corr_gradsens", 0.33)},
         {"name": "Speed\nSensitivity", "person": keys.get("pct_person_speedsens", 43.1),
          "route": keys.get("pct_route_speedsens", 0.0), "occasion": keys.get("pct_occasion_speedsens", 56.9),
-         "sb": keys.get("sb_speedsens", 0.93), "speed_r": -0.13},
+         "sb": keys.get("sb_speedsens", 0.93), "speed_r": keys.get("speed_corr_speedsens", -0.13)},
     ]
 
     fig = plt.figure(figsize=(6.5, 6))

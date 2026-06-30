@@ -276,54 +276,55 @@ def compute_metrics(rec):
 # ================================================================
 # Stream and process
 # ================================================================
-t0 = time.time()
-results = []
-total = 0; matched = 0
+if __name__ == '__main__':
+    t0 = time.time()
+    results = []
+    total = 0; matched = 0
 
-with open(JSON_PATH) as f:
-    for line in f:
-        line = line.strip()
-        if not line or line in ('[', ']'): continue
-        if line.endswith(','): line = line[:-1]
-        if line.startswith(','): line = line[1:]
-        if not line or line in ('[', ']'): continue
-        try:
-            rec = json.loads(line.replace("'", '"').replace('True','true').replace('False','false').replace('None','null'))
-        except: continue
-        if not isinstance(rec, dict): continue
-        total += 1
+    with open(JSON_PATH) as f:
+        for line in f:
+            line = line.strip()
+            if not line or line in ('[', ']'): continue
+            if line.endswith(','): line = line[:-1]
+            if line.startswith(','): line = line[1:]
+            if not line or line in ('[', ']'): continue
+            try:
+                rec = json.loads(line.replace("'", '"').replace('True','true').replace('False','false').replace('None','null'))
+            except (json.JSONDecodeError, ValueError, KeyError): continue
+            if not isinstance(rec, dict): continue
+            total += 1
 
-        wid = str(rec.get('id', ''))
-        if wid not in target_ids: continue
+            wid = str(rec.get('id', ''))
+            if wid not in target_ids: continue
 
-        metrics = compute_metrics(rec)
-        if metrics is None: continue
+            metrics = compute_metrics(rec)
+            if metrics is None: continue
 
-        results.append(metrics)
-        matched += 1
+            results.append(metrics)
+            matched += 1
 
-        if matched % 500 == 0:
-            print(f"  {matched:,} processed ({total:,} scanned, {time.time()-t0:.0f}s)", flush=True)
+            if matched % 500 == 0:
+                print(f"  {matched:,} processed ({total:,} scanned, {time.time()-t0:.0f}s)", flush=True)
 
-print(f"\nDone: {total:,} scanned → {matched:,} matched ({time.time()-t0:.0f}s)")
+    print(f"\nDone: {total:,} scanned → {matched:,} matched ({time.time()-t0:.0f}s)")
 
-# Save
-if results:
-    keys = results[0].keys()
-    with open(OUT_CSV, 'w', newline='') as f:
-        writer = csv.DictWriter(f, fieldnames=keys)
-        writer.writeheader()
-        writer.writerows(results)
-    print(f"Saved: {OUT_CSV}")
+    # Save
+    if results:
+        keys = results[0].keys()
+        with open(OUT_CSV, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=keys)
+            writer.writeheader()
+            writer.writerows(results)
+        print(f"Saved: {OUT_CSV}")
 
-    # Quick summary
-    print(f"\n{'='*60}")
-    print("METRIC SUMMARY")
-    print(f"{'='*60}")
-    for key in ['gacd_rate', 'gacd_gradient_coef', 'gacd_r2', 'gacd_resid_drift',
-                'hr_progression', 'hr_gradient_sensitivity', 'hr_speed_sensitivity',
-                'n_descents', 'avg_recovery_speed', 'recovery_decay', 'recovery_trend']:
-        vals = [r[key] for r in results if r[key] is not None and not np.isnan(r[key])]
-        if vals:
-            print(f"  {key:30s}: n={len(vals):,}  mean={np.mean(vals):+.4f}  std={np.std(vals):.4f}  "
-                  f"[{np.percentile(vals,5):+.3f}, {np.percentile(vals,95):+.3f}]")
+        # Quick summary
+        print(f"\n{'='*60}")
+        print("METRIC SUMMARY")
+        print(f"{'='*60}")
+        for key in ['gacd_rate', 'gacd_gradient_coef', 'gacd_r2', 'gacd_resid_drift',
+                    'hr_progression', 'hr_gradient_sensitivity', 'hr_speed_sensitivity',
+                    'n_descents', 'avg_recovery_speed', 'recovery_decay', 'recovery_trend']:
+            vals = [r[key] for r in results if r[key] is not None and not np.isnan(r[key])]
+            if vals:
+                print(f"  {key:30s}: n={len(vals):,}  mean={np.mean(vals):+.4f}  std={np.std(vals):.4f}  "
+                      f"[{np.percentile(vals,5):+.3f}, {np.percentile(vals,95):+.3f}]")
