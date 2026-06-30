@@ -1,7 +1,7 @@
 # IMRAD Structure v2 — Table-Centric Results
 
 ## Title
-"Beyond Aerobic Decoupling: Route Artifacts, Day-to-Day Noise, and Gradient Sensitivity as an Alternative Durability Metric in 253K Workouts"
+"Route Artifacts in Aerobic Decoupling: A 253K-Workout Validation of the 4D Durability Framework"
 
 ---
 
