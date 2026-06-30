@@ -1,0 +1,9 @@
+H5 Experiment: DI/EstimatedPower vs DI/Speed
+N = 13029
+[KEY] r_asym_di_speed = 0.4794
+[KEY] r_asym_di_estpower = -0.7582
+[KEY] r2_cv_di_speed = 0.1919
+[KEY] r2_cv_di_estpower = 0.5744
+[KEY] r_di_speed_vs_estpower = -0.1771
+[KEY] icc_di_speed = 0.1797
+[KEY] icc_di_estpower = 0.3780
