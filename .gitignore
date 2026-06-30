@@ -1,7 +1,7 @@
-# Large data files (download via run_all.sh)
-data/*.csv
-data/*.json
-!data/expected_values.json
+# Raw FitRec source (too large; download via run_all.sh Step 0)
+data/raw/
+
+# Python
 
 # Python
 __pycache__/
