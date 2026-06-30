@@ -67,67 +67,126 @@ Three exploratory hypotheses were also examined:
 
 \textbf{C1}~Empirical evidence that a two-dimensional structure is supported over the proposed 4D framework, with quantification of the route-geometry artifact ($R^2 = 0.82$; 7-fold range) and demonstration that naive power estimation overcorrects. \textbf{C2}~First large-scale variance decomposition (Person/Route/Occasion) for HR-response metrics: the same person on the same route shows 27--53\% day-to-day variation, explaining why the 4D structure cannot be sustained. \textbf{C3}~A between-person association between descent placement and cardiac drift, with modest within-person support. \textbf{C4}~Convergence analysis showing that gradient sensitivity requires $\geq 6$ sessions for adequate reliability.
 
+
 % ============================================================
 \section*{Methods}
 
 \subsection*{Data and Filtering}
 
-We used the FitRec dataset \cite{ni2018}, which contains 253,020 GPS-tracked workouts from Endomondo. Each workout record includes time-stamped arrays of heart rate (optical wrist sensor), speed (GPS-derived, m/s), altitude (barometric or GPS), and geographic coordinates. The gender variable indicates 94.0\% male, 4.8\% female, 1.2\% unknown; age and training history are unavailable.
+We used the FitRec dataset \cite{ni2018}, comprising 253,020 GPS-tracked workouts from Endomondo. Each workout record $j$ contains irregularly time-stamped arrays of heart rate ($\text{HR}_{j,i}$, optical wrist sensor, bpm), speed ($v_{j,i}$, GPS-derived, m/s), altitude ($a_{j,i}$, barometric or GPS-derived, m), and geographic coordinates, where $i = 1, \ldots, N_j$ indexes the data points. The gender variable indicates 94.0\% male, 4.8\% female, 1.2\% unknown; age, body mass, and training history are unavailable. Sensor make and firmware version are not recorded.
 
-A four-step inclusion pipeline was applied: (1)~valid HR, altitude, and speed arrays with $\geq 30$ data points each (NaN values linearly interpolated within each array); (2)~duration $> 90$~min; (3)~altitude range $> 200$~m (ensuring variable terrain); (4)~for DI/FI computation, at least 5 data points with speed $> 0.5$~km/h in each half. This yielded 13,750 workouts from 675 users for Study~1 (cycling 61.8\%, running 16.9\%, mountain biking 16.7\%, other 3.6\%; median duration 181~min [IQR 132--265]; median altitude range 349~m [IQR 263--545]; median HR 135~bpm [IQR 125--145]). Studies~2--3 required $\geq 5$ repeated workouts per user, yielding 2,343 workouts from 314 users.
+A four-step inclusion pipeline was applied: (1)~HR, altitude, and speed arrays each required $N_j \geq 30$ finite data points; missing values were linearly interpolated between flanking valid points; (2)~total duration $T_j = t_{N_j} - t_1 > 90$~min; (3)~altitude range $\Delta a_j = \max_i(a_i) - \min_i(a_i) > 200$~m, ensuring variable terrain; (4)~each temporal half (H1: $i \leq \lfloor N_j/2 \rfloor$; H2: $i > \lfloor N_j/2 \rfloor$) required $\geq 5$ points with $v_i > 0.5$~km/h.
+
+This yielded $N = 13{,}750$ workouts from $K = 675$ users for Study~1 (cycling 61.8\%, running 16.9\%, mountain biking 16.7\%, other 3.6\%; median duration 181~min [IQR 132--265]; median altitude range 349~m [IQR 263--545]; median HR 135~bpm [IQR 125--145]). Studies~2--3 required $\geq 5$ repeated workouts per user, yielding 2,343 workouts from 314 users.
 
 \subsection*{Metric Definitions}
 
-Each workout was split temporally at the midpoint into halves H1 and H2. Six metrics were computed:
-
-\textbf{(1) Decoupling Index (DI):} The ratio of HR-to-speed efficiency between halves:
+\textbf{(1) Decoupling Index (DI).} Let $\mathcal{S}_h = \{i \in \text{H}_h : v_i > 0.5\text{~km/h}\}$ for $h \in \{1, 2\}$. The DI is:
 \[
-  \text{DI} = \frac{\overline{\text{HR}}_{\text{H2}} / \overline{\text{Speed}}_{\text{H2}}}{\overline{\text{HR}}_{\text{H1}} / \overline{\text{Speed}}_{\text{H1}}}
+  \text{DI} = \frac{\bar{\text{HR}}_{\mathcal{S}_2} \,/\, \bar{v}_{\mathcal{S}_2}}{\bar{\text{HR}}_{\mathcal{S}_1} \,/\, \bar{v}_{\mathcal{S}_1}}
 \]
-where means are computed only over points with speed $> 0.5$~km/h to exclude stationary periods. DI $> 1$ indicates cardiac drift (HR rising relative to pace).
+where $\bar{\text{HR}}_{\mathcal{S}_h} = |\mathcal{S}_h|^{-1}\sum_{i \in \mathcal{S}_h} \text{HR}_i$ and analogously for $\bar{v}$. DI $> 1$ indicates cardiac drift.
 
-\textbf{(2) Fading Index (FI):} $\text{FI} = \overline{\text{Speed}}_{\text{H2}} / \overline{\text{Speed}}_{\text{H1}}$, computed within five gradient bins ($[-50,-10)$, $[-10,-3)$, $[-3,3)$, $[3,10)$, $[10,50]$~\%) and averaged. Gradient bins ensure that FI reflects speed changes at comparable terrain, not gradient-driven speed changes.
-
-\textbf{(3) Resilience Index (RI):} $\text{RI} = \text{Speed}_{\text{last climb}} / \text{Speed}_{\text{first climb}}$, where climbs were identified as segments of monotonically increasing smoothed altitude ($> 50$~m gain; moving average window $= N/20$).
-
-\textbf{(4--6) Regression-derived metrics.} Point-to-point gradient was computed as $g_i = 100 \times \Delta\text{alt}_i / \Delta\text{dist}_i$ (clipped to $\pm 50\%$; minimum $\Delta\text{dist} = 0.5$~m). A within-workout OLS regression was fitted:
+\textbf{(2) Fading Index (FI).} The gradient range was partitioned into five bins $\mathcal{B}_b$: $[-50,-10)$, $[-10,-3)$, $[-3,3)$, $[3,10)$, $[10,50]$\%. Within each bin, speed ratios were computed for each half:
 \[
-  \text{HR}_i = \beta_0 + \beta_{\text{grad}} \cdot g_i + \beta_{\text{speed}} \cdot v_i + \beta_{\text{time}} \cdot t_i + \varepsilon_i
+  \text{FI}_b = \frac{\bar{v}_{\mathcal{S}_2 \cap \mathcal{B}_b}}{\bar{v}_{\mathcal{S}_1 \cap \mathcal{B}_b}}, \quad \text{FI} = \frac{1}{|\mathcal{B}^*|} \sum_{b \in \mathcal{B}^*} \text{FI}_b
 \]
-yielding three coefficients: (4)~GACD ($\beta_{\text{time}}$, bpm/min)---the cardiac drift rate after controlling for gradient and speed; (5)~Gradient sensitivity ($\beta_{\text{grad}}$, bpm/\%); (6)~Speed sensitivity ($\beta_{\text{speed}}$, bpm/(m/s)).
+where $\mathcal{B}^* = \{b : |\mathcal{S}_1 \cap \mathcal{B}_b| \geq 3 \text{ and } |\mathcal{S}_2 \cap \mathcal{B}_b| \geq 3\}$.
+
+\textbf{(3) Resilience Index (RI).} Altitude was smoothed by a centred moving average (window $w = \lfloor N/20 \rfloor$). Climbs $C_1, \ldots, C_m$ were identified as maximal segments of monotonically increasing smoothed altitude with vertical gain $> 50$~m. If $m \geq 2$:
+\[
+  \text{RI} = \bar{v}_{C_m} \,/\, \bar{v}_{C_1}
+\]
+Workouts with $m < 2$ received no RI.
+
+\textbf{(4--6) Within-workout regression.} Point-to-point gradient was defined as:
+\[
+  g_i = \text{clip}\!\left(100 \times \frac{a_{i+1} - a_i}{d_i},\; -50,\; +50\right), \quad d_i = \max(v_i \cdot \Delta t_i,\; 0.5\text{~m}), \quad \Delta t_i = \max(t_{i+1} - t_i,\; 0.1\text{~s})
+\]
+All variables were evaluated at midpoints: $\text{HR}^*_i = (\text{HR}_i + \text{HR}_{i+1})/2$, $v^*_i = (v_i + v_{i+1})/2$, $t^*_i = (t_i + t_{i+1})/2$. On the subset of valid indices ($|\mathcal{V}| \geq 20$ required), the OLS regression:
+\[
+  \text{HR}^*_i = \beta_0 + \beta_{\text{grad}} \, g_i + \beta_{\text{speed}} \, v^*_i + \beta_{\text{time}} \, t^*_i + \varepsilon_i, \quad \hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
+\]
+where $\mathbf{X} \in \mathbb{R}^{|\mathcal{V}| \times 4}$ (intercept, $g$, $v^*$, $t^*$) yielded: (4)~GACD ($\hat{\beta}_{\text{time}}$, bpm/min); (5)~Gradient sensitivity ($\hat{\beta}_{\text{grad}}$, bpm/\%); (6)~Speed sensitivity ($\hat{\beta}_{\text{speed}}$, bpm/(m/s)). Per-workout $R^2 = 1 - \|\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}\|^2 / \|\mathbf{y} - \bar{y}\mathbf{1}\|^2$.
 
 \subsection*{Estimated Power Experiment}
 
-To test whether replacing speed with estimated metabolic power eliminates the route artifact, we computed $\text{EstPower}_i = v_i \times C_r(g_i)$, where $C_r(g)$ is the Minetti \cite{minetti2002} gradient cost function (J/kg/m), linearly interpolated from the published table (23 gradient--cost pairs from $-45\%$ to $+45\%$). DI was then recomputed as $(\text{HR}/\text{EstPower})_{\text{H2}} / (\text{HR}/\text{EstPower})_{\text{H1}}$ and compared to standard DI on the same $N = 13{,}029$ workouts.
+DI was recomputed with the denominator replaced by estimated metabolic power $P_i = v_i \cdot C_r(g_i)$~(W/kg), where $C_r(g)$ is the Minetti \cite{minetti2002} gradient cost of transport (J/kg/m), linearly interpolated from the published 23-point table ($g = -45\%$ to $+45\%$; $C_r(0\%) = 1.60$, $C_r(-3\%) = 0.40$, $C_r(+10\%) = 6.00$):
+\[
+  \text{DI}_{\text{EstP}} = \frac{\bar{\text{HR}}_{\mathcal{S}_2} \,/\, \bar{P}_{\mathcal{S}_2}}{\bar{\text{HR}}_{\mathcal{S}_1} \,/\, \bar{P}_{\mathcal{S}_1}}
+\]
+After outlier exclusion (1st and 99th percentiles), $N = 13{,}029$ workouts remained.
 
 \subsection*{Study~1: Construct Validity ($N = 13{,}750$)}
 
-Pairwise correlations among DI, FI, and RI were estimated via bootstrap resampling ($B = 1{,}000$) with 95\% bias-corrected confidence intervals. PCA was performed on standardized (DI, FI, RI) with the number of retained factors determined by parallel analysis (95th percentile of eigenvalues from $B = 1{,}000$ random permutations; $N_{\text{valid}} = 9{,}917$ complete cases). ICC(1,1) was computed for each metric using one-way random-effects ANOVA on users with $\geq 5$ repeated workouts.
+Pairwise Pearson correlations among DI, FI, and RI were estimated via nonparametric bootstrap ($B = 1{,}000$; resampled with replacement; 95\% CI from 2.5th and 97.5th percentiles). PCA was performed on column-standardised metrics ($z_{ij} = (x_{ij} - \bar{x}_j) / s_j$; $N_{\text{valid}} = 9{,}917$ complete cases). Factor retention was determined by parallel analysis \cite{horn1965}: observed eigenvalues were compared to the 95th percentile of eigenvalues from $B = 1{,}000$ column-wise random permutations. ICC(1,1) was computed for each metric on users with $\geq 5$ workouts (see Study~3).
 
 \subsection*{Study~2: Artifact Detection ($N = 2{,}343$ real $+ 5{,}000$ simulated)}
 
-\textbf{Route prediction.} Ridge regression ($\alpha = 1.0$) predicted each metric from 13 route features (total ascent/descent, altitude range/max/min, gradient mean/std, climb/descent/flat fractions, ascent-front/descent-front ratios, duration). Cross-validated $R^2$ used GroupKFold ($k = 5$; groups = userId) to prevent within-user data leakage.
+\textbf{Route prediction.} Let $\mathbf{x}_j \in \mathbb{R}^{13}$ denote 13 route features (total ascent/descent, altitude range, max/min altitude, gradient mean/std, climb/descent/flat fractions, ascent-front and descent-front ratios, duration). Features were $z$-standardised per fold. Ridge regression:
+\[
+  \hat{\boldsymbol{\beta}}_{\text{ridge}} = (\mathbf{X}^\top \mathbf{X} + \alpha \mathbf{I})^{-1} \mathbf{X}^\top \mathbf{y}, \quad \alpha = 1.0
+\]
+and gradient boosted trees (100 trees, max depth 3) were fitted. Generalisation was assessed by group $k$-fold cross-validated $R^2$ ($k = 5$; all workouts of each user in the same fold):
+\[
+  R^2_{\text{CV}} = 1 - \frac{\sum_{f=1}^{5} \sum_{j \in \text{test}_f} (y_j - \hat{y}_j^{(f)})^2}{\sum_{f=1}^{5} \sum_{j \in \text{test}_f} (y_j - \bar{y})^2}
+\]
+The hilly subset was restricted to $\Delta a_j > 500$~m. For GACD, the target was the within-person deviation $\tilde{y}_{kj} = y_{kj} - \bar{y}_{k\cdot}$ (users with $\geq 3$ workouts), isolating route effects from person-level means.
 
-\textbf{Simulation.} $N = 5{,}000$ synthetic workouts were generated with cardiac drift set exactly to zero: HR was modeled as a deterministic function of gradient only ($\text{HR} = 140 + 2 \times g_i + \mathcal{N}(0, 5)$), while speed decreased linearly with gradient ($v = 20 - 0.3 \times g_i$). Route profiles were drawn from two-segment altitude curves with gradient pairs uniformly sampled from $[-15\%, +15\%]$, creating systematic asymmetry. DI was computed identically to real data, and route prediction $R^2$ was evaluated via the same Ridge/GroupKFold pipeline.
+\textbf{Simulation.} $N = 5{,}000$ synthetic workouts ($N_{\text{pts}} = 60$, split at 30) were generated with cardiac drift set exactly to zero. Five route types were sampled with equal probability:
+\begin{itemize}
+  \item Front-climb: $g_{\text{H1}} \sim \mathcal{N}(8, 3^2)$,\; $g_{\text{H2}} \sim \mathcal{N}(-5, 3^2)$
+  \item Back-climb: reversed
+  \item Symmetric: $g \sim \mathcal{N}(0, 5^2)$ throughout
+  \item Valley: $g_{\text{H1}} \sim \mathcal{N}(-6, 3^2)$,\; $g_{\text{H2}} \sim \mathcal{N}(6, 3^2)$
+  \item Peak: reversed
+\end{itemize}
+Per-workout parameters: $\text{HR}_0 \sim U(100, 140)$, $\gamma_{\text{HR}} \sim U(2, 8)$~bpm/\%, $v_0 \sim U(2, 5)$~m/s, $\gamma_v \sim U(0.05, 0.15)$~(m/s)/\%. The data-generating process was:
+\[
+  \text{HR}_i = \text{HR}_0 + \gamma_{\text{HR}} \cdot g_i + \epsilon^{\text{HR}}_i, \quad \epsilon^{\text{HR}}_i \sim \mathcal{N}(0, 3^2)
+\]
+\[
+  v_i = \max\!\left(0.5,\; v_0 - \gamma_v \cdot g_i + \epsilon^v_i\right), \quad \epsilon^v_i \sim \mathcal{N}(0, 0.3^2)
+\]
+No time-dependent term was included; any non-unity DI arises purely from gradient asymmetry between halves.
 
-\textbf{Descent-placement analysis.} The descent-front ratio ($\text{desc\_front} = \sum \text{descent}_{\text{H1}} / \sum \text{descent}_{\text{total}}$) was tested as a predictor of GACD via: (a)~between-person partial correlation (controlling for total descent); (b)~within-person correlations for users with $\geq 5$ varied routes ($n = 108$); (c)~steepness stratification (gentle: $\sigma_{\text{grad}} < 5$; moderate: $5$--$8$; steep: $> 8$); (d)~sport-specific analysis. All exploratory $p$-values were adjusted by Benjamini--Hochberg FDR.
+\textbf{Descent-placement analysis.} Define the descent-front ratio:
+\[
+  \delta = \frac{\sum_{i \in \text{H1}} |\min(\Delta a_i, 0)|}{\sum_{i=1}^{N} |\min(\Delta a_i, 0)|}
+\]
+This was tested as a predictor of GACD via: (a)~between-person standardised coefficient $\beta^*$ (controlling for total descent); (b)~within-person Pearson $r$ for users with $\geq 5$ varied routes ($n = 108$); (c)~steepness stratification ($\sigma_g < 5$; $5$--$8$; $> 8$); (d)~sport-specific subgroups. All eight exploratory $p$-values were adjusted by Benjamini--Hochberg FDR \cite{benjamini1995}.
 
 \subsection*{Study~3: Variance Decomposition ($N = 2{,}343$)}
 
-Variance was partitioned into three sources:
-\begin{enumerate}
-  \item \textbf{\%Person} $= \text{ICC}(1,1)$, computed from one-way random-effects ANOVA with unequal group sizes ($n_0 = [N - \sum n_k^2/N] / [K-1]$).
-  \item \textbf{\%Route}: Within-person deviations ($x_{ij} - \bar{x}_i$) were predicted from route features via Ridge regression with GroupKFold CV ($k = 5$). $\%\text{Route} = \max(0, R^2_{\text{CV}}) \times (1 - \text{ICC})$.
-  \item \textbf{\%Occasion} $= 100 - \%\text{Person} - \%\text{Route}$ (residual).
-\end{enumerate}
+\textbf{ICC(1,1).} One-way random-effects ANOVA \cite{shrout1979} for users with $n_k \geq 5$:
+\[
+  \text{ICC}(1,1) = \frac{\text{MS}_{\text{B}} - \text{MS}_{\text{W}}}{\text{MS}_{\text{B}} + (n_0 - 1)\,\text{MS}_{\text{W}}}
+\]
+\[
+  \text{MS}_{\text{B}} = \frac{\sum_{k=1}^{K} n_k (\bar{x}_{k\cdot} - \bar{x}_{\cdot\cdot})^2}{K-1}, \quad \text{MS}_{\text{W}} = \frac{\sum_{k=1}^{K} \sum_{j=1}^{n_k} (x_{kj} - \bar{x}_{k\cdot})^2}{N-K}, \quad n_0 = \frac{N - \sum_k n_k^2/N}{K-1}
+\]
 
-\textbf{Route-matched sensitivity analysis.} Users who repeated similar routes ($\pm 20\%$ in both altitude range and total ascent; $n = 451$ matched pairs from 78 users) were identified. Route-matched ICC was computed on matched pairs only, providing an upper-bound estimate of person-level stability with route variation minimized.
+\textbf{Variance partitioning.} The between-person share was $\%\text{Person} = \text{ICC} \times 100$. Within-person deviations $\tilde{x}_{kj} = x_{kj} - \bar{x}_{k\cdot}$ were predicted from the 13 route features via Ridge regression ($\alpha = 1.0$) with group $k$-fold CV ($k = 5$), yielding $R^2_{\text{route}}$. Because this prediction operates only on the within-person variance $(1 - \text{ICC})$:
+\[
+  \%\text{Route} = \max(0,\, R^2_{\text{route}}) \times (1 - \text{ICC}) \times 100, \quad \%\text{Occasion} = 100 - \%\text{Person} - \%\text{Route}
+\]
+The residual $\%\text{Occasion}$ captures daily physiological state, environmental conditions, sensor noise, and unmodeled route variation.
 
-\textbf{Split-half reliability.} For users with $\geq 10$ workouts, the Pearson correlation between the mean of the first half of workouts and the mean of the second half was computed and corrected via the Spearman--Brown formula: $\text{SB} = 2r / (1 + r)$.
+\textbf{Route-matched sensitivity analysis.} Workout pairs were matched if:
+\[
+  \left|\frac{\Delta a_j - \Delta a_{j'}}{\Delta a_j}\right| \leq 0.20 \quad \text{and} \quad \left|\frac{A_j^+ - A_{j'}^+}{A_j^+}\right| \leq 0.20
+\]
+where $A^+$ denotes total ascent ($n = 451$ pairs, 78 users). Route-matched ICC provided an upper-bound estimate of person-level stability.
 
-\textbf{Convergence analysis.} For $k = 2, 3, \ldots, 10$, split-half reliability was recomputed using only the first $k$ and next $k$ workouts (users with $\geq 2k$ workouts). This provides guidance on the minimum number of sessions required to reach adequate reliability (SB $\geq 0.80$).
+\textbf{Split-half reliability and convergence.} For users with $\geq 2k$ chronologically ordered workouts, $r_{\text{sh}}$ between the mean of the first $k$ and the mean of the second $k$ workouts was corrected:
+\[
+  \text{SB}_k = \frac{2\,r_{\text{sh}}}{1 + r_{\text{sh}}}
+\]
+$\text{SB}_k$ was computed for $k = 2, 3, \ldots, 10$ to determine the minimum sessions for $\text{SB} \geq 0.80$. ICC sensitivity was verified across $n_{\min} \in \{3, 5, 7, 10\}$.
 
-\textbf{Convergent validity.} Average speed served as a crude external criterion; Pearson correlations between each metric's user-level mean and mean speed were computed.
+\textbf{Convergent validity.} User-level mean speed served as an external criterion; Pearson $r$ between each metric's user-level mean and mean speed was computed.
+
+\textbf{Software and reproducibility.} Python 3.12 (NumPy 1.26, SciPy 1.13, pandas 2.2, scikit-learn 1.5; random seed 42). Code: \url{https://github.com/ikari12/GRAD}.
 
 % ============================================================
 \section*{Results}
