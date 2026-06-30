@@ -1,7 +1,7 @@
 # IMRAD Structure v2 — Table-Centric Results
 
 ## Title
-"Route Artifacts in Aerobic Decoupling: A 253K-Workout Validation of the 4D Durability Framework"
+"Route Artifacts in Aerobic Decoupling: A 253K-Workout Validation of 4D Durability"
 
 ---
 
