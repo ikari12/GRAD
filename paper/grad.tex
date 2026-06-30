@@ -1,6 +1,7 @@
 \documentclass[times, twoside]{zHenriquesLab-StyleBioRxiv}
 \usepackage{bm}
 \usepackage{booktabs}
+\usepackage{graphicx}
 
 \leadauthor{Ikari}
 
@@ -97,8 +98,9 @@ where $\mathcal{B}^* = \{b : |\mathcal{S}_1 \cap \mathcal{B}_b| > 3 \text{ and }
 
 \textbf{(3) Resilience Index (RI).} Altitude was smoothed by a trailing moving average (window $w = \max(1, \lfloor N/20 \rfloor)$, mode = ``valid''). A climb was initiated when the smoothed altitude increased by $> 0.5$~m from one point to the next, and terminated when this condition ceased; only climbs with cumulative vertical gain $> 50$~m were retained. Let $C_1, \ldots, C_m$ denote the retained climbs. If $m \geq 2$:
 \[
-  \text{RI} = \bar{v}_{C_m} \,/\, \bar{v}_{C_1}, \quad \bar{v}_{C_l} = \frac{1}{|\{i \in C_l : v_i > 0.5\}|} \sum_{\substack{i \in C_l \\ v_i > 0.5}} v_i
+  \text{RI} = \bar{v}_{C_m} / \bar{v}_{C_1}
 \]
+where $\bar{v}_{C_l} = |\{i \in C_l : v_i > 0.5\}|^{-1} \sum_{i \in C_l,\, v_i > 0.5} v_i$.
 Workouts with $m < 2$ received no RI.
 
 \textbf{(4--6) Within-workout regression.} For the regression-derived metrics, speed was in m/s and gradient was computed as:
@@ -171,15 +173,16 @@ Study~1 establishes that no dimension reaches ICC $\geq 0.50$ (H2), motivating t
   \text{ICC}(1,1) = \frac{\text{MS}_{\text{B}} - \text{MS}_{\text{W}}}{\text{MS}_{\text{B}} + (n_0 - 1)\,\text{MS}_{\text{W}}}
 \]
 \begin{align*}
-  \text{MS}_{\text{B}} &= \frac{\sum_{k=1}^{K} n_k (\bar{x}_{k\cdot} - \bar{x}_{\cdot\cdot})^2}{K-1}, \quad
-  \text{MS}_{\text{W}} = \frac{\sum_{k=1}^{K} \sum_{j=1}^{n_k} (x_{kj} - \bar{x}_{k\cdot})^2}{N-K}, \\[4pt]
+  \text{MS}_{\text{B}} &= \frac{\sum_{k=1}^{K} n_k (\bar{x}_{k\cdot} - \bar{x}_{\cdot\cdot})^2}{K-1}, \\[4pt]
+  \text{MS}_{\text{W}} &= \frac{\sum_{k=1}^{K} \sum_{j=1}^{n_k} (x_{kj} - \bar{x}_{k\cdot})^2}{N-K}, \\[4pt]
   n_0 &= \frac{N - \sum_k n_k^2/N}{K-1}
 \end{align*}
 
 \textbf{Variance partitioning.} The between-person share was $\%\text{Person} = \text{ICC} \times 100$. Within-person deviations $\tilde{x}_{kj} = x_{kj} - \bar{x}_{k\cdot}$ were predicted from the 13 route features via Ridge regression ($\alpha = 1.0$) with group $k$-fold CV ($k = \min(5, K_{\text{valid}})$), yielding $R^2_{\text{route}}$. Because this prediction operates only on the within-person variance $(1 - \text{ICC})$:
-\[
-  \%\text{Route} = \max(0,\, R^2_{\text{route}}) \times (1 - \text{ICC}) \times 100, \quad \%\text{Occasion} = 100 - \%\text{Person} - \%\text{Route}
-\]
+\begin{align*}
+  \%\text{Route} &= \max(0,\, R^2_{\text{route}}) \times (1 - \text{ICC}) \times 100, \\
+  \%\text{Occasion} &= 100 - \%\text{Person} - \%\text{Route}
+\end{align*}
 The residual $\%\text{Occasion}$ captures daily physiological state, environmental conditions, sensor noise, and unmodeled route variation. Uncertainty in the variance partitioning was estimated via user-level bootstrap ($B = 500$; 95\% CI from percentiles).
 
 \textbf{Route-matched sensitivity analysis.} Workout pairs were matched if:
@@ -339,18 +342,19 @@ The variance decomposition (H4) provides the first quantitative evidence for the
 \small
 \caption{Comparison of DI and the proposed GACD-derived metrics for individual profiling on hilly terrain.}
 \label{tab:proposed}
+\resizebox{\columnwidth}{!}{%
 \begin{tabular}{@{}lccc@{}}
 \toprule
-Attribute & DI (cardiac drift) & Gradient sensitivity & Speed sensitivity \\
+Attribute & DI (cardiac drift) & Grad.\ sensitivity & Speed sensitivity \\
 \midrule
 ICC & 0.163 (Poor) & \textbf{0.358} (Fair) & \textbf{0.454} (Fair) \\
 SB reliability & 0.63 & \textbf{0.90} & \textbf{0.93} \\
 Sessions to SB $\geq 0.80$ & $\geq 9$ & \textbf{6} & \textbf{3} \\
-Route artifact (CV $R^2$) & $-2.30$ & \textbf{+0.089} & +0.003 \\
-Speed correlation ($r$) & --- & \textbf{+0.33} & --- \\
+Route (CV $R^2$) & $-2.30$ & \textbf{+0.089} & +0.003 \\
+Speed corr.\ ($r$) & --- & \textbf{+0.33} & --- \\
 \bottomrule
-\end{tabular}
-\end{table}
+\end{tabular}%
+}
 
 The recommended protocol is: (1)~apply GACD regression to remove route-geometry artifacts from each session, (2)~extract gradient and speed sensitivity as the individual's durability profile, and (3)~aggregate $\geq 6$ sessions for stable estimates. Sport-specific baselines are required, as gradient sensitivity varies substantially across modalities (cycling $+7.25$ bpm/\%, MTB $+3.83$, running $+1.49$; $F = 103.3$, $\eta^2 = 0.082$).
 
