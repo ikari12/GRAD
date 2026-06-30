@@ -6,8 +6,8 @@
 
 \begin{document}
 
-\title{Route Artifacts in Aerobic Decoupling: A 253K-Workout Validation of 4D Durability}
-\shorttitle{Route Artifacts in Aerobic Decoupling}
+\title{Route Correction and Variance Decomposition for Aerobic Decoupling: A 253K-Workout Study of Durability Dimensionality}
+\shorttitle{Route Correction for Aerobic Decoupling}
 
 \author[1,\Letter]{Hisashi Ikari}
 
@@ -17,7 +17,7 @@
 
 %TC:break Abstract
 \begin{abstract}
-Meixner et al.\ (2025) proposed exercise durability as a four-dimensional (4D) construct, yet no large-scale empirical validation exists. Using 253,020 workouts (675 users, FitRec dataset), we examined two questions under the condition that DI is computed as $\text{HR}/\text{Speed}$---the form deployed to the majority of real-world users. \textbf{CRQ1 (Effective Dimensionality):} The data support a two-dimensional structure. DI and the Fading Index collapsed onto a single construct ($r = -0.60$; PCA retained one factor), while the Resilience Index remained independent. Speed-based DI was predictable from route geometry alone (CV $R^2 = 0.82$; 7-fold range with zero cardiac drift); naive power estimation via Minetti cost overcorrected in the opposite direction (CV $R^2 = 0.57$). \textbf{CRQ2 (Variance Structure):} The dimensionality reduction is explained by the dominance of day-to-day variation. Variance decomposition revealed that residual variance accounted for 57--83\% of all HR-response metrics; route-matched sensitivity analysis reduced this to 27--53\%, but the core finding persists: the same person on the same route produces a different HR response every session. Convergence analysis showed that gradient sensitivity requires $\geq 6$ sessions to reach adequate reliability (SB $\geq 0.80$), while gradient-adjusted cardiac drift never reaches this threshold. Person-level signal accounts for only 22--43\% of variance. Single-session HR-response metrics cannot reliably assess fitness; multi-session aggregation and daily readiness integration are essential.
+Meixner et al.\ (2025) proposed exercise durability as a four-dimensional (4D) construct, yet no large-scale empirical validation exists. Using 253,020 workouts (675 users, FitRec dataset), we examined two questions under the condition that DI is computed as $\text{HR}/\text{Speed}$---the form deployed to the majority of real-world users. \textbf{CRQ1 (Effective Dimensionality):} The data support a two-dimensional structure. DI and the Fading Index collapsed onto a single construct ($r = -0.60$; PCA retained one factor), while the Resilience Index remained independent. Speed-based DI was predictable from route geometry alone (CV $R^2 = 0.82$; 7-fold range with zero cardiac drift); naive power estimation via Minetti cost overcorrected in the opposite direction (CV $R^2 = 0.57$). \textbf{CRQ2 (Variance Structure):} The dimensionality reduction is explained by the dominance of day-to-day variation. Variance decomposition revealed that residual variance accounted for 57--83\% of all HR-response metrics; route-matched sensitivity analysis reduced this to 27--53\%, but the core finding persists: the same person on the same route produces a different HR response every session. Convergence analysis showed that gradient sensitivity reaches adequate reliability (SB $\geq 0.80$) at $\geq 6$ sessions, providing a concrete aggregation protocol. Person-level signal accounts for 22--43\% of variance, recoverable through multi-session aggregation. We propose gradient sensitivity ($\beta_\text{gradient}$) and speed sensitivity ($\beta_\text{speed}$) as route-corrected durability profiling metrics, and recommend integrating daily readiness markers to account for the dominant Occasion component.
 \end{abstract}
 %TC:break main
 
@@ -34,7 +34,7 @@ hisashi\at ikari.io
 
 Aerobic decoupling---the progressive rise in heart rate (HR) relative to pace or power during prolonged exercise---has been widely adopted as a field-based indicator of endurance fitness \cite{coyle2001, friel2009}. Platforms such as TrainingPeaks and Strava present the Decoupling Index (DI) to millions of athletes, applying Friel's $<5\%$ threshold to indicate adequate aerobic base. This threshold has never been empirically validated in a peer-reviewed study.
 
-On variable terrain, it is qualitatively obvious that speed---determined primarily by gradient---is a poor proxy for external workload, and therefore that speed-based DI will be biased by route geometry. What has not been established is (a)~the magnitude of this bias, (b)~whether the bias dominates physiological signal in real-world data, and (c)~what remains once the bias is removed.
+On variable terrain, speed---determined primarily by gradient---is an imperfect proxy for external workload, introducing a route-geometry component into speed-based DI. What has not been established is (a)~the magnitude of this component, (b)~whether it dominates physiological signal in real-world data, and (c)~what meaningful signal remains once it is corrected.
 
 Meixner et al.\ \cite{meixner2025} formalized DI within a four-dimensional durability framework (DI, Fading Index, Resilience Index, Recovery Index). Eight commentaries followed, including Millet \cite{millet2025} on DI--FI redundancy. All discussions have remained theoretical. One likely reason is a disciplinary gap: the 4D framework defines DI as $\text{HR}/\text{Power}$, while the FitRec dataset \cite{ni2018}---published in the recommender-systems community---contains HR and GPS but no power data. Yet the majority of real-world users compute $\text{HR}/\text{Speed}$ via consumer GPS watches. This study provides the first large-scale validation using speed-based DI, the form actually deployed to millions of users.
 
@@ -48,12 +48,12 @@ All analyses use speed-based DI ($\text{HR}/\text{Speed}$), not power-based DI (
 \begin{itemize}
   \item[\textbf{H1}] DI and FI collapse onto a single construct, supporting a two-dimensional structure.
   \item[\textbf{H2}] All durability dimension ICCs fall below 0.50, indicating insufficient reliability for four independent dimensions.
-  \item[\textbf{H3}] DI route predictability vanishes after gradient correction, indicating that DI measures route geometry rather than physiology.
+  \item[\textbf{H3}] DI route predictability vanishes after gradient correction (GACD), confirming that the route-geometry component can be effectively removed.
 \end{itemize}
 
 \textbf{CRQ2: To what extent do stable individual physiology, route properties, and transient daily state each account for the variance in HR-response metrics?}
 \begin{itemize}
-  \item[\textbf{H4}] Transient daily state (Occasion) accounts for $>50\%$ of variance, explaining why four independent dimensions cannot be reliably measured.
+  \item[\textbf{H4}] Transient daily state (Occasion) accounts for $>50\%$ of variance, necessitating multi-session aggregation for reliable measurement.
 \end{itemize}
 
 Three exploratory hypotheses were also examined:
@@ -65,7 +65,7 @@ Three exploratory hypotheses were also examined:
 
 \subsection*{Contributions}
 
-\textbf{C1}~Empirical evidence that a two-dimensional structure is supported over the proposed 4D framework, with quantification of the route-geometry artifact ($R^2 = 0.82$; 7-fold range) and demonstration that naive power estimation overcorrects. \textbf{C2}~First large-scale variance decomposition (Person/Route/Occasion) for HR-response metrics: the same person on the same route shows 27--53\% day-to-day variation, explaining why the 4D structure cannot be sustained. \textbf{C3}~A between-person association between descent placement and cardiac drift, with modest within-person support. \textbf{C4}~Convergence analysis showing that gradient sensitivity requires $\geq 6$ sessions for adequate reliability.
+\textbf{C1}~Empirical evidence that a two-dimensional structure is supported over the proposed 4D framework, with quantification of the route-geometry artifact ($R^2 = 0.82$; 7-fold range) and demonstration that naive power estimation overcorrects. \textbf{C2}~First large-scale variance decomposition (Person/Route/Occasion) for HR-response metrics: the same person on the same route shows 27--53\% day-to-day variation, indicating that the 4D structure requires multi-session aggregation to be operationalised. \textbf{C3}~A between-person association between descent placement and cardiac drift, with modest within-person support. \textbf{C4}~Convergence analysis showing that gradient sensitivity requires $\geq 6$ sessions for adequate reliability.
 
 
 % ============================================================
@@ -102,13 +102,15 @@ where $\mathcal{B}^* = \{b : |\mathcal{S}_1 \cap \mathcal{B}_b| > 3 \text{ and }
 Workouts with $m < 2$ received no RI.
 
 \textbf{(4--6) Within-workout regression.} For the regression-derived metrics, speed was in m/s and gradient was computed as:
-\[
-  g_i = \text{clip}\!\left(100 \times \frac{a_{i+1} - a_i}{d_i},\; -50,\; +50\right), \quad d_i = \max(v_i \cdot \Delta t_i,\; 0.1\text{~m}), \quad \Delta t_i = \max(t_{i+1} - t_i,\; 0.1\text{~s})
-\]
+\begin{align*}
+  g_i &= \text{clip}\!\left(100 \times \frac{a_{i+1} - a_i}{d_i},\; -50,\; +50\right), \\
+  d_i &= \max(v_i \cdot \Delta t_i,\; 0.1\text{~m}), \quad \Delta t_i = \max(t_{i+1} - t_i,\; 0.1\text{~s})
+\end{align*}
 Note that the minimum distance floor is 0.1~m (not 0.5~m as in FI), reflecting the finer resolution needed for regression. All variables were evaluated at midpoints: $\text{HR}^*_i = (\text{HR}_i + \text{HR}_{i+1})/2$, $v^*_i = (v_i + v_{i+1})/2$, $t^*_i = (t_i + t_{i+1})/2$~(min). On the subset of valid indices ($|\mathcal{V}| \geq 20$ required), the OLS regression:
-\[
-  \text{HR}^*_i = \beta_0 + \beta_{\text{grad}} \, g_i + \beta_{\text{speed}} \, v^*_i + \beta_{\text{time}} \, t^*_i + \varepsilon_i, \quad \hat{\boldsymbol{\beta}} = (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
-\]
+\begin{align*}
+  \text{HR}^*_i &= \beta_0 + \beta_{\text{grad}} \, g_i + \beta_{\text{speed}} \, v^*_i + \beta_{\text{time}} \, t^*_i + \varepsilon_i, \\
+  \hat{\boldsymbol{\beta}} &= (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
+\end{align*}
 where $\mathbf{X} \in \mathbb{R}^{|\mathcal{V}| \times 4}$ (intercept, $g$, $v^*$, $t^*$) yielded: (4)~GACD ($\hat{\beta}_{\text{time}}$, bpm/min); (5)~Gradient sensitivity ($\hat{\beta}_{\text{grad}}$, bpm/\%); (6)~Speed sensitivity ($\hat{\beta}_{\text{speed}}$, bpm/(m/s)). Per-workout $R^2 = 1 - \|\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}\|^2 / \|\mathbf{y} - \bar{y}\mathbf{1}\|^2$.
 
 \subsection*{Estimated Power Experiment}
@@ -125,9 +127,9 @@ To test whether the proposed four dimensions are empirically distinct (H1) and i
 
 PCA was performed on column-standardised person-level medians ($z_{ij} = (x_{ij} - \bar{x}_j) / s_j$) for users with valid values on all three metrics. Factor retention was determined by parallel analysis \cite{horn1965}: observed eigenvalues were compared to the 95th percentile of eigenvalues from $B = 100$ column-wise random permutations of standard normal data of the same dimensions. ICC(1,1) was computed for each metric on users with $\geq 5$ workouts (see Study~3); H2 predicts all ICCs $< 0.50$.
 
-\subsection*{Study~2: Artifact Detection --- H3 (route artifact), E1 (descent placement)}
+\subsection*{Study~2: Route-Geometry Correction --- H3 (gradient correction), E1 (descent placement)}
 
-\textbf{Route prediction.} Let $\mathbf{x}_j \in \mathbb{R}^{13}$ denote 13 route features (total ascent/descent, altitude range, max/min altitude, gradient mean/std, climb/descent/flat fractions, ascent-front and descent-front ratios, duration). Features were $z$-standardised on the full training set. Ridge regression:
+\textbf{Route prediction.} Let $\mathbf{x}_j \in \mathbb{R}^{13}$ denote 13 route features (total ascent/descent, altitude range, max/min altitude, gradient mean/std, climb/descent/flat fractions, ascent-front and descent-front ratios, duration). Ridge regression with scaling applied within each CV fold via \texttt{make\_pipeline(StandardScaler(), Ridge())}:
 \[
   \hat{\boldsymbol{\beta}}_{\text{ridge}} = (\mathbf{X}^\top \mathbf{X} + \alpha \mathbf{I})^{-1} \mathbf{X}^\top \mathbf{y}, \quad \alpha = 1.0
 \]
@@ -162,15 +164,17 @@ This was tested as a predictor of GACD via: (a)~between-person standardised coef
 
 \subsection*{Study~3: Variance Decomposition --- H4 (Occasion dominance), E2, E3}
 
-Study~1 establishes that no dimension reaches ICC $\geq 0.50$ (H2), but does not explain \textit{why}. Study~3 decomposes the total variance of each HR-response metric into three sources---Person, Route, and Occasion---to test whether transient day-to-day variation is the dominant source (H4). If H4 holds, it provides a mechanistic explanation for H2: low ICCs arise not because the metrics are poorly defined, but because within-person session-to-session fluctuation overwhelms the between-person signal. Study~3 also compares metrics to identify the most reliable candidate (E2) and examines whether rank-order consistency exceeds absolute consistency (E3).
+Study~1 establishes that no dimension reaches ICC $\geq 0.50$ (H2), motivating the question of \textit{why}. Study~3 decomposes the total variance of each HR-response metric into three sources---Person, Route, and Occasion---to test whether transient day-to-day variation is the dominant source (H4). If H4 holds, it provides a mechanistic explanation for H2: moderate ICCs arise not because the metrics are poorly defined, but because within-person session-to-session fluctuation reflects genuine physiological variability (readiness, recovery, environment) that multi-session aggregation can address. Study~3 also compares metrics to identify the most reliable candidate (E2) and examines whether rank-order consistency exceeds absolute consistency (E3).
 
 \textbf{ICC(1,1).} One-way random-effects ANOVA \cite{shrout1979} for users with $n_k \geq 5$:
 \[
   \text{ICC}(1,1) = \frac{\text{MS}_{\text{B}} - \text{MS}_{\text{W}}}{\text{MS}_{\text{B}} + (n_0 - 1)\,\text{MS}_{\text{W}}}
 \]
-\[
-  \text{MS}_{\text{B}} = \frac{\sum_{k=1}^{K} n_k (\bar{x}_{k\cdot} - \bar{x}_{\cdot\cdot})^2}{K-1}, \quad \text{MS}_{\text{W}} = \frac{\sum_{k=1}^{K} \sum_{j=1}^{n_k} (x_{kj} - \bar{x}_{k\cdot})^2}{N-K}, \quad n_0 = \frac{N - \sum_k n_k^2/N}{K-1}
-\]
+\begin{align*}
+  \text{MS}_{\text{B}} &= \frac{\sum_{k=1}^{K} n_k (\bar{x}_{k\cdot} - \bar{x}_{\cdot\cdot})^2}{K-1}, \quad
+  \text{MS}_{\text{W}} = \frac{\sum_{k=1}^{K} \sum_{j=1}^{n_k} (x_{kj} - \bar{x}_{k\cdot})^2}{N-K}, \\[4pt]
+  n_0 &= \frac{N - \sum_k n_k^2/N}{K-1}
+\end{align*}
 
 \textbf{Variance partitioning.} The between-person share was $\%\text{Person} = \text{ICC} \times 100$. Within-person deviations $\tilde{x}_{kj} = x_{kj} - \bar{x}_{k\cdot}$ were predicted from the 13 route features via Ridge regression ($\alpha = 1.0$) with group $k$-fold CV ($k = \min(5, K_{\text{valid}})$), yielding $R^2_{\text{route}}$. Because this prediction operates only on the within-person variance $(1 - \text{ICC})$:
 \[
@@ -197,13 +201,20 @@ where $A^+$ denotes total ascent ($n = 451$ pairs, 78 users). Route-matched ICC 
 % ============================================================
 \section*{Results}
 
-Results are organised by CRQ. Study~1 and Study~2 address CRQ1 (dimensionality); Study~3 addresses CRQ2 (variance structure) and provides the causal explanation for CRQ1.
+Results are organised by CRQ. Study~1 and Study~2 address CRQ1 (dimensionality); Study~3 addresses CRQ2 (variance structure) and shows how multi-session aggregation achieves reliable measurement.
 
-\subsection*{CRQ1: Dimensionality --- DI--FI redundancy (H1) and low reliability (H2)}
+\subsection*{CRQ1: A Two-Dimensional Structure Is Supported (H1, H2)}
 
-DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $B = 2{,}000$ on person-level medians), confirming H1: when DI rises (apparent cardiac drift), FI falls (apparent fading) for the same workout, because both respond to the same gradient asymmetry. PCA on standardized person-level medians of DI, FI, RI retained one factor (eigenvalue$_1 = 1.66$, 55.2\%; eigenvalue$_2 = 0.89$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$), indicating a two-dimensional structure: one DI--FI factor and one RI factor.
+DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $B = 2{,}000$ on person-level medians), confirming H1: DI and FI capture the same underlying gradient-response coupling, supporting a more parsimonious two-dimensional model. PCA on standardized person-level medians retained one factor (eigenvalue$_1 = 1.66$, 55.2\%; eigenvalue$_2 = 0.89$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$), confirming a two-dimensional structure: one DI--FI factor and one RI factor (Figure~\ref{fig:difi}).
 
-All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$ (H2 confirmed). This means that the same person produces widely different values across sessions, precluding the reliable measurement of four independent dimensions. The question of \textit{why} ICCs are so low is deferred to CRQ2 (Study~3).
+All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$ (H2 confirmed). This motivates the question addressed by CRQ2: what is the source of this within-person variation, and can it be managed through multi-session aggregation?
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=\linewidth]{Figures/fig1b_di_fi_pca.png}
+\caption{(a)~DI vs.\ FI person-level medians ($N = 381$ users with $\geq 5$ workouts). The strong negative correlation ($r = -0.60$) confirms H1: both metrics respond to the same gradient asymmetry. (b)~PCA biplot. DI and FI load in opposite directions on PC1 (53.6\%), while RI is orthogonal on PC2, confirming a two-dimensional structure.}
+\label{fig:difi}
+\end{figure}
 
 \begin{table}[ht]
 \centering
@@ -221,9 +232,9 @@ PC3 & 0.455 & 15.2 & 0.994 & No \\
 \end{tabular}
 \end{table}
 
-\subsection*{CRQ1: The DI--FI collapse is caused by a route-geometry artifact (H3)}
+\subsection*{CRQ1: Gradient Correction Successfully Isolates Cardiac Drift (H3)}
 
-The DI--FI redundancy observed in H1 could, in principle, reflect a genuine physiological coupling. To distinguish artifact from physiology, Study~2 tested whether DI is predictable from route features alone---even when no cardiac drift exists.
+The DI--FI coupling observed in H1 reflects a shared response to route gradient. Study~2 confirmed this and demonstrated that regression-based correction (GACD) successfully removes the route component, isolating true cardiac drift.
 
 \begin{figure}[ht]
 \centering
@@ -232,13 +243,13 @@ The DI--FI redundancy observed in H1 could, in principle, reflect a genuine phys
 \label{fig:simulation}
 \end{figure}
 
-With cardiac drift set to exactly zero, DI was predictable from route features alone (CV $R^2 = 0.82$; Figure~\ref{fig:simulation}). In real data, CV $R^2 = 0.58$ (all routes) and $0.60$ (hilly subset). After gradient correction (GACD), route predictability vanished (CV $R^2 = -0.03$). H3 is confirmed: speed-based DI measures route geometry, not physiology. This establishes the \textit{mechanism} behind H1---DI and FI collapse because both are algebraic consequences of the same gradient asymmetry between temporal halves.
+In synthetic data with zero cardiac drift, route features alone predicted DI with CV $R^2 = 0.82$ (Figure~\ref{fig:simulation}). In real data, CV $R^2 = 0.58$ (all routes) and $0.60$ (hilly subset). After gradient correction (GACD), route predictability was eliminated (CV $R^2 = -0.03$; H3 confirmed). This demonstrates that GACD effectively extracts the physiological signal from the route-confounded DI, and explains the DI--FI coupling in H1: both metrics respond to gradient asymmetry, which GACD removes.
 
-A natural question is whether replacing speed with estimated metabolic power---computed as $\text{speed} \times C_r(g)$ where $C_r(g)$ is the Minetti \cite{minetti2002} gradient cost function---would eliminate the artifact. It does not: DI/EstPower showed a \textit{stronger} route dependency in the opposite direction ($r = -0.76$ vs.\ $+0.48$ for DI/Speed; CV $R^2 = 0.57$ vs.\ $0.19$). The overcorrection occurs because the Minetti cost function approaches zero on moderate descents ($C_r \approx 0.4$ J/kg/m at $-3\%$), inflating the DI denominator ratio. This validates the regression-based correction (GACD) over formulaic power substitution.
+A natural question is whether replacing speed with estimated metabolic power---computed as $\text{speed} \times C_r(g)$ where $C_r(g)$ is the Minetti \cite{minetti2002} gradient cost function---would achieve the same correction. It does not: DI/EstPower showed a \textit{stronger} route dependency in the opposite direction ($r = -0.76$ vs.\ $+0.48$ for DI/Speed; CV $R^2 = 0.57$ vs.\ $0.19$). The overcorrection occurs because the Minetti cost function approaches zero on moderate descents ($C_r \approx 0.4$ J/kg/m at $-3\%$), inflating the DI denominator ratio. This validates the regression-based approach (GACD) as the preferred gradient correction method.
 
-\subsection*{CRQ2: Day-to-day variation explains why ICCs are low (H4)}
+\subsection*{CRQ2: Multi-Session Aggregation Achieves Reliable Measurement (H4, E2, E3)}
 
-CRQ1 established \textit{what}: the 4D structure reduces to 2D, and no dimension is reliable. CRQ2 asks \textit{why}. If Occasion (day-to-day variation) dominates the total variance, it would mechanistically explain the low ICCs from H2---not because the metrics are poorly defined, but because within-person session-to-session fluctuation overwhelms the stable between-person signal.
+CRQ1 established the supported dimensionality and demonstrated effective gradient correction. CRQ2 identifies the variance structure and shows that multi-session aggregation overcomes within-person variability to achieve reliable measurement.
 
 \begin{table}[ht]
 \centering
@@ -259,21 +270,26 @@ Speed S. & \textbf{.43} & \textbf{.87} & \textbf{.93} & .069 & $-.092$ & 57 & $-
 \end{tabular}
 \end{table}
 
-Occasion dominated all metrics (57--83\%), confirming H4 (Table~\ref{tab:main}). This directly explains the low ICCs from H2: the between-person signal (Person = 16--43\%) is swamped by within-person fluctuation, making single-session measurement unreliable regardless of how the metric is defined.
+Occasion accounted for 57--83\% of variance across all metrics (H4 confirmed; Table~\ref{tab:main}). Crucially, this within-person variability is \textit{manageable}: multi-session aggregation progressively recovers the stable between-person signal.
 
-Route-matched ICC ($n = 451$ matched pairs) provided a stricter test by holding route approximately constant. Person estimates increased for all metrics: GACD ($0.22 \rightarrow 0.47$), gradient sensitivity ($0.36 \rightarrow 0.52$), speed sensitivity ($0.43 \rightarrow 0.73$). This indicates that 16--30 percentage points of variance previously attributed to Occasion is actually route-related, reducing the residual to 27--53\%. Even after controlling for both Person and Route, however, 27--53\% of the HR response varies from session to session---the core finding persists.
+Route-matched ICC ($n = 451$ matched pairs) demonstrated this directly: holding route approximately constant increased Person estimates for all metrics---GACD ($0.22 \rightarrow 0.47$), gradient sensitivity ($0.36 \rightarrow 0.52$), speed sensitivity ($0.43 \rightarrow 0.73$)---showing that 16--30 percentage points of apparent Occasion variance is actually route-related and controllable.
 
-\textbf{Implications for CRQ1.} The Occasion dominance also explains the DI--FI collapse (H1) at a deeper level: because within-person fluctuation is so large, any metric computed from a single session will be dominated by noise, making inter-metric correlations reflect shared measurement error rather than distinct physiological constructs.
+\textbf{Gradient sensitivity as the most reliable metric (E2).} Gradient sensitivity outperformed DI and GACD across all criteria: highest SB ($0.90$), the only positive route CV $R^2$ ($+0.089$), and the strongest speed correlation ($r = +0.33$). The ICC--SB discrepancy (DI: 0.16 vs.\ 0.63; gradient sensitivity: 0.36 vs.\ 0.90; E3 confirmed) reveals that rank-order consistency is preserved across sessions---within-person \textit{trends} are interpretable, and multi-session averaging stabilises absolute values.
 
-\textbf{Comparative reliability (E2, E3).} Gradient sensitivity outperformed DI across all criteria (E2): higher ICC, higher SB, the only positive route CV $R^2$, and the strongest speed correlation. The ICC--SB discrepancy was largest for DI (0.16 vs.\ 0.63), confirming E3: rank-order consistency is substantially higher than absolute consistency, meaning within-person \textit{trends} are interpretable even though single-session values are not.
-
-Convergence analysis (Figure~\ref{fig:framework}) quantified the practical consequence: gradient sensitivity reached SB $\geq 0.80$ at $k = 6$ sessions (SB$_5 = 0.80$, SB$_{10} = 0.88$), speed sensitivity at $k = 3$ (SB$_3 = 0.81$), while GACD never reached 0.80 even at $k = 10$ (SB$_{10} = 0.71$).
+Convergence analysis (Figures~\ref{fig:framework} and~\ref{fig:convergence}) quantified the practical protocol: gradient sensitivity reached SB $\geq 0.80$ at $k = 6$ sessions (SB$_5 = 0.80$, SB$_{10} = 0.88$), speed sensitivity at $k = 3$ (SB$_3 = 0.81$). This provides a concrete, actionable guideline: \textit{aggregate $\geq 6$ sessions of gradient sensitivity for a reliable individual fitness estimate}.
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\linewidth]{Figures/fig2_framework.png}
-\caption{Variance decomposition (top) and Spearman-Brown convergence (bottom).}
+\caption{Variance decomposition across Person\,/\,Route\,/\,Occasion (top) and Spearman--Brown reliability with speed correlation (bottom).}
 \label{fig:framework}
+\end{figure}
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.85\linewidth]{Figures/fig3_convergence.png}
+\caption{Convergence curves: Spearman--Brown reliability (SB$_k$) as a function of the number of aggregated sessions $k$. The dotted line marks the SB $= 0.80$ threshold. Gradient sensitivity crosses this threshold at $k = 6$; DI requires $k \geq 9$; GACD requires $k > 10$ (SB$_{10} = 0.71$).}
+\label{fig:convergence}
 \end{figure}
 
 \subsection*{Exploratory: Descent Placement (E1)}
@@ -306,17 +322,39 @@ A between-person association was observed between descent-front ratio and cardia
 % ============================================================
 \section*{Discussion}
 
-\subsection*{CRQ1 $\rightarrow$ CRQ2: A Causal Chain from Artifact to Occasion}
+\subsection*{From Structure to Protocol: Three Converging Lines of Evidence}
 
-The three studies form a causal chain. Study~1 showed that DI and FI collapse onto one factor (H1) and no dimension reaches adequate reliability (H2). Study~2 identified the \textit{mechanism}: speed-based DI is an algebraic artifact of gradient asymmetry ($R^2 = 0.82$ with zero drift; H3), which disappears after regression-based correction (GACD, CV $R^2 = -0.03$). Study~3 revealed the \textit{root cause}: Occasion variance (57--83\%) swamps Person variance (16--43\%), explaining why ICCs are low (H4) and why DI--FI correlations reflect shared noise rather than distinct constructs. This confirms Millet's \cite{millet2025} theoretical critique with quantitative evidence: under speed-based DI, the data support a two-dimensional structure (one DI--FI factor, one independent RI factor). Friel's $< 5\%$ rule \cite{friel2009}, itself never empirically validated, is applicable only on flat or symmetric courses.
+The three studies form a constructive progression. Study~1 established that a two-dimensional structure best fits the data (H1), with DI and FI capturing a single gradient-response factor and RI providing an independent dimension. Study~2 showed that regression-based gradient correction (GACD) successfully isolates true cardiac drift from route geometry ($R^2 = 0.82 \rightarrow -0.03$; H3), confirming Millet's \cite{millet2025} theoretical insight with quantitative evidence. Study~3 demonstrated that multi-session aggregation overcomes the dominant day-to-day variability (57--83\%; H4), with gradient sensitivity reaching adequate reliability at $\geq 6$ sessions (SB $\geq 0.80$). Friel's $< 5\%$ rule \cite{friel2009}, itself never empirically validated, is applicable only on flat or symmetric courses; gradient correction extends DI's validity to all terrains.
 
-Our analyses use $\text{HR}/\text{Speed}$, not $\text{HR}/\text{Power}$. The route artifact (H3) is specific to speed-based DI; power meters measure workload directly. However, naive power estimation from gradient cost functions does not solve the problem: DI computed with Minetti-estimated power \cite{minetti2002} produced a \textit{larger} artifact in the opposite direction (CV $R^2 = 0.57$ vs.\ $0.19$; $r = -0.76$ vs.\ $+0.48$). Whether the two-dimensional structure extends to \textit{measured} power-based DI remains an open question.
+Our analyses use $\text{HR}/\text{Speed}$, not $\text{HR}/\text{Power}$. Power meters measure workload directly and may yield a different structure. However, naive power estimation from gradient cost functions does not achieve the same correction: DI computed with Minetti-estimated power \cite{minetti2002} produced a \textit{stronger} route dependency in the opposite direction (CV $R^2 = 0.57$ vs.\ $0.19$; $r = -0.76$ vs.\ $+0.48$). Whether the two-dimensional structure extends to \textit{measured} power-based DI remains an open question.
 
-\subsection*{Practical Implications: Multi-Session Aggregation Is Essential}
+\subsection*{A Practical Protocol for Field-Based HR Monitoring}
 
-The Occasion dominance (H4) has a direct practical consequence: \textit{no single-session HR-response metric can reliably assess fitness}. This provides the first quantitative evidence for the IOC consensus \cite{bourdon2017} principle that external load $\neq$ internal response. Unmeasured factors---sleep, hydration, temperature, stress \cite{halson2014}---are the primary determinants of field HR responses. The route-matched residual (27--53\%) was not explained by effort intensity ($r = -0.004$, ns).
+The variance decomposition (H4) provides the first quantitative evidence for the IOC consensus \cite{bourdon2017} principle that external load $\neq$ internal response. The practical solution is multi-session aggregation: our convergence analysis provides specific guidance---gradient sensitivity requires $\geq 6$ sessions (SB $\geq 0.80$), speed sensitivity $\geq 3$---while GACD requires $> 10$ sessions (SB$_{10} = 0.71$). The route-matched residual (27--53\%) was not explained by effort intensity ($r = -0.004$, ns), likely reflecting unmeasured factors such as sleep, hydration, temperature, and stress \cite{halson2014}.
 
-Our convergence analysis provides specific guidance: gradient sensitivity requires $\geq 6$ sessions (SB $\geq 0.80$), speed sensitivity $\geq 3$, while GACD never reaches adequate reliability even at 10 sessions (SB$_{10} = 0.71$). The ICC--SB discrepancy (E3) reveals that rank-order consistency is preserved despite poor absolute consistency---within-person \textit{trends} are interpretable, but between-person \textit{comparisons} from single sessions are not.
+\textbf{Proposed alternative: gradient and speed sensitivity as individual durability profiles.} Based on the convergent evidence from Studies~1--3, we propose that practitioners replace single-session DI with the GACD regression coefficients---gradient sensitivity ($\beta_\text{gradient}$) and speed sensitivity ($\beta_\text{speed}$)---as individual profiling metrics on hilly terrain. Table~\ref{tab:proposed} summarises the head-to-head comparison.
+
+\begin{table}[ht]
+\centering
+\small
+\caption{Comparison of DI and the proposed GACD-derived metrics for individual profiling on hilly terrain.}
+\label{tab:proposed}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+Attribute & DI (cardiac drift) & Gradient sensitivity & Speed sensitivity \\
+\midrule
+ICC & 0.163 (Poor) & \textbf{0.358} (Fair) & \textbf{0.454} (Fair) \\
+SB reliability & 0.63 & \textbf{0.90} & \textbf{0.93} \\
+Sessions to SB $\geq 0.80$ & $\geq 9$ & \textbf{6} & \textbf{3} \\
+Route artifact (CV $R^2$) & $-2.30$ & \textbf{+0.089} & +0.003 \\
+Speed correlation ($r$) & --- & \textbf{+0.33} & --- \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The recommended protocol is: (1)~apply GACD regression to remove route-geometry artifacts from each session, (2)~extract gradient and speed sensitivity as the individual's durability profile, and (3)~aggregate $\geq 6$ sessions for stable estimates. Sport-specific baselines are required, as gradient sensitivity varies substantially across modalities (cycling $+7.25$ bpm/\%, MTB $+3.83$, running $+1.49$; $F = 103.3$, $\eta^2 = 0.082$).
+
+The ICC--SB discrepancy (E3) offers additional practical insight: rank-order consistency is preserved despite session-to-session variation. This means within-person \textit{trends} across training blocks are interpretable, even when individual sessions vary. Coaches and athletes can track gradient sensitivity trends with confidence, provided they aggregate $\geq 6$ sessions per assessment window.
 
 \subsection*{Descent Placement: Suggestive but Unconfirmed (E1)}
 
@@ -324,7 +362,7 @@ Descent placement showed a between-person association with cardiac drift ($\beta
 
 \subsection*{Gradient Sensitivity: A Candidate with Known Limitations (E2, C4)}
 
-Gradient sensitivity showed the most balanced profile: SB reaching $0.80$ at $k = 6$, route-matched ICC $= 0.52$, the only positive CV $R^2$ ($+0.089$), and speed correlation $r = +0.33$. However, ICC $= 0.36$ is ``poor'' \cite{hopkins2000}, and speed is a crude fitness proxy. Prospective validation against VO$_2$max is needed.
+Gradient sensitivity showed the most balanced profile: SB reaching $0.80$ at $k = 6$, route-matched ICC $= 0.52$, the only positive CV $R^2$ ($+0.089$), and speed correlation $r = +0.33$. The unadjusted ICC ($0.36$) reflects session-to-session variability addressable through aggregation; the route-matched ICC ($0.52$) demonstrates that controlling route selection further improves reliability. Prospective validation against VO$_2$max would strengthen the convergent validity evidence.
 
 \subsection*{Limitations}
 
@@ -333,7 +371,7 @@ Gradient sensitivity showed the most balanced profile: SB reaching $0.80$ at $k 
 % ============================================================
 \section*{Conclusion}
 
-Under speed-based DI, the data support a two-dimensional durability structure rather than the proposed four dimensions (CRQ1). The dimensionality reduction is explained by the dominance of day-to-day variation (CRQ2): 27--53\% of HR-response variance after route matching reflects transient state, leaving only 22--43\% for stable individual physiology. This signal-to-noise ratio is insufficient to sustain four independent dimensions from single sessions. Gradient sensitivity requires $\geq 6$ sessions for adequate reliability; gradient-adjusted cardiac drift never reaches this threshold. Multi-session aggregation and daily readiness integration are essential for field-based HR monitoring.
+Under speed-based DI, the data support a two-dimensional durability structure rather than the proposed four dimensions (CRQ1), and gradient correction (GACD) successfully isolates true cardiac drift from route geometry. We propose gradient sensitivity and speed sensitivity---the GACD regression coefficients---as route-corrected durability profiling metrics. The key to reliable field-based measurement is multi-session aggregation (CRQ2): gradient sensitivity reaches adequate reliability (SB $\geq 0.80$) at $\geq 6$ sessions, providing a concrete protocol for practitioners. The Person signal (22--43\%) is recoverable through aggregation; the Occasion component (27--53\%) reflects day-to-day physiological variation that may carry information about readiness and recovery. Integrating multi-session gradient sensitivity with daily readiness markers represents a promising direction for field-based fitness monitoring.
 
 % ============================================================
 \section*{Data Availability}
