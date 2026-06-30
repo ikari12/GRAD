@@ -39,7 +39,10 @@ plt.rcParams.update({
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 RESULTS_DIR = os.path.join(SCRIPT_DIR, "results")
+DATA_DIR = os.path.join(SCRIPT_DIR, "data")
+PAPER_FIG_DIR = os.path.join(SCRIPT_DIR, "paper", "Figures")
 os.makedirs(RESULTS_DIR, exist_ok=True)
+os.makedirs(PAPER_FIG_DIR, exist_ok=True)
 
 
 def parse_keys(*paths):
@@ -134,7 +137,7 @@ def generate_figure1():
     ax.legend(loc="lower left", framealpha=0.95, handletextpad=0.4, borderpad=0.4)
 
     fig.tight_layout()
-    out = os.path.join(RESULTS_DIR, "fig1_simulation.png")
+    out = os.path.join(PAPER_FIG_DIR, "fig1_simulation.png")
     fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close()
     print(f"  ✓ Figure 1 saved: {out}")
@@ -261,16 +264,171 @@ def generate_figure2():
     ax_bot.legend(handles=legend_bot, loc="lower right", fontsize=8, framealpha=0.95)
 
     fig.tight_layout()
-    out = os.path.join(RESULTS_DIR, "fig2_framework.png")
+    out = os.path.join(PAPER_FIG_DIR, "fig2_framework.png")
     fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
     plt.close()
     print(f"  ✓ Figure 2 saved: {out}")
 
 
+# ============================================================
+# Figure 1b: DI vs FI scatter + PCA biplot
+# ============================================================
+def generate_fig1b():
+    path = os.path.join(DATA_DIR, "meixner_4d_indices.csv")
+    with open(path) as f:
+        header = f.readline().strip().split(",")
+        rows = [l.strip().split(",") for l in f if l.strip()]
+    raw = {c: [] for c in header}
+    for row in rows:
+        for c, v in zip(header, row):
+            raw[c].append(v)
+
+    def tof(vs):
+        r = []
+        for v in vs:
+            try: r.append(float(v))
+            except: r.append(np.nan)
+        return np.array(r)
+
+    uids = np.array(raw["userId"])
+    di, fi, ri = tof(raw["DI"]), tof(raw["FI"]), tof(raw["RI"])
+    uniq = np.unique(uids)
+    ucnt = {u: np.sum(uids == u) for u in uniq}
+
+    def pmed(met, mw=5):
+        ms, us = [], []
+        for u in uniq:
+            if ucnt[u] < mw: continue
+            v = met[uids == u]; v = v[~np.isnan(v)]
+            if len(v) == 0: continue
+            ms.append(np.median(v)); us.append(u)
+        return np.array(ms), np.array(us)
+
+    dm, ud = pmed(di); fm, uf = pmed(fi); rm, ur = pmed(ri)
+    com = np.intersect1d(np.intersect1d(ud, uf), ur)
+    dc = np.array([dm[np.where(ud == u)[0][0]] for u in com])
+    fc = np.array([fm[np.where(uf == u)[0][0]] for u in com])
+    rc = np.array([rm[np.where(ur == u)[0][0]] for u in com])
+
+    fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(7.5, 3.8),
+                                    gridspec_kw={"width_ratios": [1.3, 1]})
+    r_val = np.corrcoef(dc, fc)[0, 1]
+    ax1.scatter(dc, fc, s=18, alpha=0.5, color="#2166AC",
+                edgecolors="white", linewidths=0.3, zorder=3)
+    z = np.polyfit(dc, fc, 1)
+    xf = np.linspace(np.percentile(dc, 1), np.percentile(dc, 99), 100)
+    ax1.plot(xf, np.polyval(z, xf), "-", color="#B2182B", linewidth=1.5, zorder=4)
+    ax1.axhline(1.0, color="#CCCCCC", ls="--", lw=0.5, zorder=1)
+    ax1.axvline(1.0, color="#CCCCCC", ls="--", lw=0.5, zorder=1)
+    ax1.text(0.03, 0.97, f"$r = {r_val:.2f}$\n$N = {len(com)}$ users",
+             transform=ax1.transAxes, fontsize=9, va="top",
+             bbox=dict(boxstyle="round,pad=0.3", fc="white", ec="#CCCCCC", alpha=0.9))
+    ax1.set_xlabel("Decoupling Index (DI, person median)")
+    ax1.set_ylabel("Fading Index (FI, person median)")
+    ax1.set_xlim(np.percentile(dc, 0.5), np.percentile(dc, 99.5))
+    ax1.set_ylim(np.percentile(fc, 0.5), np.percentile(fc, 99.5))
+    ax1.set_title("(a) DI–FI Redundancy (H1)", fontsize=10, fontweight="bold")
+
+    X = np.column_stack([dc, fc, rc])
+    Xs = (X - X.mean(0)) / X.std(0)
+    evals, evecs = np.linalg.eigh(np.cov(Xs, rowvar=False))
+    idx = evals.argsort()[::-1]; evals = evals[idx]; evecs = evecs[:, idx]
+    scores = Xs @ evecs[:, :2]
+    vexp = evals[:2] / evals.sum() * 100
+    ax2.scatter(scores[:, 0], scores[:, 1], s=12, alpha=0.3,
+                color="#999999", edgecolors="none", zorder=2)
+    labs = ["DI", "FI", "RI"]; cols = ["#2166AC", "#D95F02", "#1B7837"]
+    sc = 2.5
+    for i, (lb, co) in enumerate(zip(labs, cols)):
+        lx, ly = evecs[i, 0] * sc, evecs[i, 1] * sc
+        ax2.annotate("", xy=(lx, ly), xytext=(0, 0),
+            arrowprops=dict(arrowstyle="-|>", color=co, lw=2.0, mutation_scale=12), zorder=5)
+        ox = 0.15 if lx >= 0 else -0.15
+        oy = 0.15 if ly >= 0 else -0.15
+        ax2.text(lx + ox, ly + oy, lb, fontsize=11, fontweight="bold", color=co,
+                 ha="left" if lx >= 0 else "right",
+                 va="bottom" if ly >= 0 else "top", zorder=6)
+    ax2.axhline(0, color="#DDDDDD", lw=0.5, zorder=1)
+    ax2.axvline(0, color="#DDDDDD", lw=0.5, zorder=1)
+    ax2.set_xlabel(f"PC1 ({vexp[0]:.1f}%)")
+    ax2.set_ylabel(f"PC2 ({vexp[1]:.1f}%)")
+    ax2.set_title("(b) PCA Biplot", fontsize=10, fontweight="bold")
+    ax2.set_aspect("equal", adjustable="datalim")
+    fig.tight_layout()
+    out = os.path.join(PAPER_FIG_DIR, "fig1b_di_fi_pca.png")
+    fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close()
+    print(f"  ✓ Figure 1b saved: {out}")
+
+
+# ============================================================
+# Figure 3: Convergence Curves (SB_k vs k)
+# ============================================================
+def generate_fig3():
+    import pandas as pd
+    from scipy import stats
+
+    df_m = pd.read_csv(os.path.join(DATA_DIR, "meixner_4d_indices.csv"))
+    df_abc = pd.read_csv(os.path.join(DATA_DIR, "abc_metrics.csv"))
+
+    configs = [
+        ("DI", "DI", df_m, "DI (naive)", "#AAAAAA", "s", "--"),
+        ("GACD", "gacd_rate", df_abc, "GACD (drift)", "#D95F02", "^", "-"),
+        ("GradS", "gacd_gradient_coef", df_abc, "Gradient Sensitivity", "#2166AC", "o", "-"),
+        ("SpeedS", "gacd_speed_coef", df_abc, "Speed Sensitivity", "#1B7837", "D", "-"),
+    ]
+    ks = [2, 3, 4, 5, 6, 7, 8, 9, 10]
+    np.random.seed(42)
+    fig, ax = plt.subplots(figsize=(5.5, 4.0))
+
+    for _, col, df, disp, color, marker, ls in configs:
+        if col not in df.columns:
+            continue
+        mdf = df[["userId", col]].dropna()
+        sbs = []
+        for k in ks:
+            cnts = mdf.groupby("userId").size()
+            vu = cnts[cnts >= 2 * k].index
+            sub = mdf[mdf["userId"].isin(vu)]
+            if len(vu) < 10:
+                sbs.append(np.nan); continue
+            g1, g2 = [], []
+            for uid, grp in sub.groupby("userId"):
+                vals = np.random.permutation(grp[col].values)
+                g1.append(vals[:k].mean()); g2.append(vals[k:2*k].mean())
+            r_sh, _ = stats.pearsonr(g1, g2)
+            sb = 2 * r_sh / (1 + r_sh) if r_sh > -1 else np.nan
+            sbs.append(sb)
+        ax.plot(ks, sbs, f"{ls}", color=color, marker=marker, label=disp,
+                markersize=6, linewidth=1.5, markerfacecolor="white",
+                markeredgewidth=1.5, markeredgecolor=color, zorder=3)
+
+    ax.axhline(0.80, color="#BBBBBB", ls=":", lw=1.0, zorder=1)
+    ax.text(10.3, 0.81, "SB = 0.80", fontsize=8, color="#999999", va="bottom")
+    ax.fill_between([1.5, 10.5], 0.80, 1.02, color="#E8F5E9", alpha=0.3, zorder=0)
+    ax.text(6.0, 0.96, "adequate reliability", fontsize=8, color="#66BB6A",
+            ha="center", style="italic")
+    ax.set_xlabel("Number of aggregated sessions ($k$)")
+    ax.set_ylabel("Spearman–Brown reliability (SB$_k$)")
+    ax.set_title("Convergence: Sessions Needed for Adequate Reliability",
+                 fontsize=10, fontweight="bold")
+    ax.set_xticks(ks)
+    ax.set_xlim(1.5, 10.5)
+    ax.set_ylim(0.2, 1.02)
+    ax.legend(loc="lower right", framealpha=0.95)
+    fig.tight_layout()
+    out = os.path.join(PAPER_FIG_DIR, "fig3_convergence.png")
+    fig.savefig(out, dpi=300, bbox_inches="tight", facecolor="white")
+    plt.close()
+    print(f"  ✓ Figure 3 saved: {out}")
+
+
 if __name__ == "__main__":
     print("=" * 60)
-    print("Figure Generation (Journal Style v2)")
+    print("Figure Generation — all to paper/Figures/")
     print("=" * 60)
     generate_figure1()
+    generate_fig1b()
     generate_figure2()
-    print("Done.")
+    generate_fig3()
+    print("Done. All figures in paper/Figures/")
