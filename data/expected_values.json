@@ -1,0 +1,39 @@
+{
+  "study1": {
+    "di_fi_r": {"value": -0.597, "tolerance": 0.03},
+    "di_ri_r": {"value": 0.031, "tolerance": 0.03},
+    "icc_di": {"value": 0.163, "tolerance": 0.01},
+    "icc_fi": {"value": 0.084, "tolerance": 0.01},
+    "icc_ri": {"value": 0.098, "tolerance": 0.01},
+    "pca_n_factors": {"value": 1, "tolerance": 0},
+    "sh_di_r": {"value": 0.454, "tolerance": 0.02},
+    "sb_di": {"value": 0.625, "tolerance": 0.02}
+  },
+  "study2": {
+    "di_route_r2_hilly": {"value": 0.603, "tolerance": 0.05},
+    "gacd_route_r2_cv_all": {"value": -0.002, "tolerance": 0.02},
+    "sim_r2_cv": {"value": 0.824, "tolerance": 0.05},
+    "sim_di_front_climb": {"value": 0.392, "tolerance": 0.05},
+    "sim_di_back_climb": {"value": 2.762, "tolerance": 0.3},
+    "sim_di_symmetric": {"value": 1.002, "tolerance": 0.05},
+    "desc_between_all": {"value": 0.167, "tolerance": 0.02},
+    "desc_d_hilly": {"value": 0.27, "tolerance": 0.05},
+    "desc_between_moderate": {"value": 0.534, "tolerance": 0.05}
+  },
+  "study3": {
+    "icc_gacd": {"value": 0.219, "tolerance": 0.01},
+    "icc_gradsens": {"value": 0.358, "tolerance": 0.01},
+    "icc_speedsens": {"value": 0.431, "tolerance": 0.01},
+    "sb_gradsens": {"value": 0.901, "tolerance": 0.02},
+    "sb_speedsens": {"value": 0.928, "tolerance": 0.02},
+    "pct_route_gacd": {"value": 0.0, "tolerance": 1.0},
+    "pct_occasion_gacd": {"value": 78.1, "tolerance": 2.0},
+    "pct_person_gradsens": {"value": 35.8, "tolerance": 2.0},
+    "pct_route_gradsens": {"value": 5.7, "tolerance": 2.0},
+    "pct_occasion_gradsens": {"value": 58.5, "tolerance": 2.0},
+    "speed_corr_gradsens": {"value": 0.327, "tolerance": 0.03},
+    "temporal_r_gradsens": {"value": 0.767, "tolerance": 0.03},
+    "converge_5": {"value": 0.796, "tolerance": 0.03},
+    "route_r2_cv_gradsens": {"value": 0.089, "tolerance": 0.02}
+  }
+}

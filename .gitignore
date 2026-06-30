@@ -1,0 +1,12 @@
+# Large data files (download via run_all.sh)
+data/*.csv
+data/*.json
+!data/expected_values.json
+
+# Python
+__pycache__/
+*.pyc
+.venv/
+
+# OS
+.DS_Store

@@ -1,0 +1,66 @@
+Loading data...
+
+============================================================
+(a) Naive DI Prediction from Route Features (Ridge + GBT)
+============================================================
+[KEY] di_route_r2_all = 0.5754
+[KEY] di_route_r2_cv_all = 0.3604
+[KEY] di_route_r2_hilly = 0.6033
+  N(all valid) = 2343, N(hilly) = 681
+
+============================================================
+(b) GACD Prediction from Route Features (within-person deviation, Ridge)
+============================================================
+[KEY] gacd_route_r2_all = 0.0310
+[KEY] gacd_route_r2_cv_all = -0.0019
+  N(valid deviations) = 2151
+
+============================================================
+(c) Simulation: DI artifact with zero cardiac drift
+============================================================
+[KEY] sim_r2_cv = 0.8242
+[KEY] sim_r_asymmetry = -0.8872
+[KEY] sim_di_front_climb = 0.3921
+[KEY] sim_di_back_climb = 2.7621
+[KEY] sim_di_symmetric = 1.0024
+
+  --- Drift experiment (symmetric routes only) ---
+[KEY] sim_drift00_di = 1.0044
+[KEY] sim_drift01_di = 1.0542
+[KEY] sim_drift05_di = 1.2247
+
+============================================================
+(d) Descent Position Effect (Table 2)
+============================================================
+[KEY] desc_between_all = 0.1667
+[KEY] desc_within_all = 0.0890
+[KEY] desc_d_all = 0.1203
+  N(all) = 2343
+[KEY] desc_between_gentle = 0.1015
+[KEY] desc_within_gentle = 0.0848
+[KEY] desc_d_gentle = 0.0570
+  N(gentle) = 2225
+[KEY] desc_between_moderate = 0.5344
+[KEY] desc_within_moderate = 0.1037
+[KEY] desc_d_moderate = 1.1434
+  N(moderate) = 93
+[KEY] desc_between_steep = 0.4238
+[KEY] desc_within_steep = nan
+[KEY] desc_d_steep = 0.3474
+  N(steep) = 25
+[KEY] desc_between_hilly = 0.2708
+[KEY] desc_within_hilly = 0.1249
+[KEY] desc_d_hilly = 0.2742
+  N(hilly) = 681
+
+  --- Sport-specific between-person correlations ---
+[KEY] desc_between_bike = 0.1380
+  N(bike) = 1967
+[KEY] desc_between_run = 0.2000
+  N(run) = 128
+[KEY] desc_between_mtb = 0.0119
+  N(mtb) = 224
+
+============================================================
+Study 2 complete.
+============================================================
