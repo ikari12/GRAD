@@ -212,29 +212,29 @@ Results are organised by CRQ. Study~1 and Study~2 address CRQ1 (dimensionality);
 
 \subsection*{CRQ1: A Two-Dimensional Structure Is Supported (H1, H2)}
 
-DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $B = 2{,}000$ on person-level medians), confirming H1: DI and FI capture the same underlying gradient-response coupling, supporting a more parsimonious two-dimensional model. PCA on standardized person-level medians retained one factor (eigenvalue$_1 = 1.66$, 55.2\%; eigenvalue$_2 = 0.89$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$), confirming a two-dimensional structure: one DI--FI factor and one RI factor (Figure~\ref{fig:difi}).
+DI and FI showed $r = -0.60$ (95\% CI $[-0.69, -0.49]$; bootstrap $B = 2{,}000$ on person-level medians), confirming H1: DI and FI capture the same underlying gradient-response coupling, supporting a more parsimonious two-dimensional model. PCA on standardized person-level medians retained one factor (eigenvalue$_1 = 1.61$, 53.6\%; eigenvalue$_2 = 1.01$, below the parallel-analysis 95th-percentile threshold; Table~\ref{tab:pca}). RI was largely independent (DI--RI: $r = -0.19$; FI--RI: $r = +0.19$), confirming a two-dimensional structure: one DI--FI factor and one RI factor (Figure~\ref{fig:difi}).
 
 All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$ (H2 confirmed). This motivates the question addressed by CRQ2: what is the source of this within-person variation, and can it be managed through multi-session aggregation?
 
 \begin{figure}[ht]
 \centering
 \includegraphics[width=\linewidth]{Figures/fig1b_di_fi_pca.png}
-\caption{(a)~DI vs.\ FI person-level medians ($N = 381$ users with $\geq 5$ workouts). The strong negative correlation ($r = -0.60$) confirms H1: both metrics respond to the same gradient asymmetry. (b)~PCA biplot. DI and FI load in opposite directions on PC1 (55.2\%), while RI is orthogonal on PC2, confirming a two-dimensional structure.}
+\caption{(a)~DI vs.\ FI person-level medians ($N = 381$ users with $\geq 5$ workouts). The strong negative correlation ($r = -0.60$) confirms H1: both metrics respond to the same gradient asymmetry. (b)~PCA biplot. DI and FI load in opposite directions on PC1 (53.6\%), while RI is orthogonal on PC2, confirming a two-dimensional structure.}
 \label{fig:difi}
 \end{figure}
 
 \begin{table}[ht]
 \centering
 \small
-\caption{PCA eigenvalues and parallel analysis on person-level medians. Loadings on PC1: DI $= -0.654$, FI $= +0.653$, RI $= +0.382$.}
+\caption{PCA eigenvalues and parallel analysis on person-level medians. Loadings on PC1: DI $= -0.694$, FI $= +0.708$, RI $= +0.130$.}
 \label{tab:pca}
 \begin{tabular}{@{}lcccl@{}}
 \toprule
  & Eigenvalue & \% Var. & Parallel 95\% & Retain? \\
 \midrule
-PC1 & 1.657 & 55.2 & 1.028 & Yes \\
-PC2 & 0.887 & 29.6 & 1.006 & No \\
-PC3 & 0.455 & 15.2 & 0.994 & No \\
+PC1 & 1.613 & 53.6 & 1.028 & Yes \\
+PC2 & 1.007 & 33.5 & 1.006 & No \\
+PC3 & 0.388 & 12.9 & 0.994 & No \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -331,7 +331,7 @@ A between-person association was observed between descent-front ratio and cardia
 
 \subsection*{From Structure to Protocol: Three Converging Lines of Evidence}
 
-The three studies form a constructive progression that builds upon, rather than contradicts, the existing theoretical framework. Study~1 established that a two-dimensional structure best fits speed-based data (H1), with DI and FI capturing a single gradient-response factor and RI providing an independent dimension. This empirical convergence of DI and FI reflects a property of the specific speed-based operationalizations used here, not a theoretical prediction of the source framework: Colosio et al.\ \cite{millet2025} argued precisely that durability and fatigability are physiologically distinct constructs that should be measured separately---a distinction that our operationalization was designed to preserve but that the speed-based field metrics did not fully resolve. Study~2 showed that regression-based gradient correction (GACD) successfully isolates true cardiac drift from route geometry ($R^2 = 0.82 \rightarrow -0.03$; H3), providing the quantitative foundation that Meixner et al.'s conceptual framework requires for field deployment. Study~3 demonstrated that multi-session aggregation overcomes the dominant day-to-day variability (57--83\%; H4), with gradient sensitivity reaching adequate reliability at $\geq 6$ sessions (SB $\geq 0.80$). Friel's $< 5\%$ rule \cite{friel2009} represents a pioneering insight for flat or symmetric courses; GACD extends this principle to all terrains, enabling practitioners to apply Friel's aerobic-base concept even on hilly routes where naive DI is dominated by geometry. Smyth et al.\ \cite{smyth2022} demonstrated in 82,303 marathon runners that decoupling magnitude and onset predict performance, confirming the practical relevance of field-based decoupling measurement; the present study extends this line of work by identifying the route-geometry component as a major confound and providing a regression-based correction (GACD) applicable beyond the road-marathon context.
+The three studies form a constructive progression that builds upon, rather than contradicts, the existing theoretical framework. Study~1 established that a two-dimensional structure best fits speed-based data (H1), with DI and FI capturing a single gradient-response factor and RI providing an independent dimension. This empirical convergence of DI and FI reflects a property of the specific speed-based operationalizations used here, not a theoretical prediction of the source framework: Colosio et al.\ \cite{millet2025} argued precisely that durability and fatigability are physiologically distinct constructs that should be measured separately---a distinction that our operationalization was designed to preserve but that the speed-based field metrics did not fully resolve. Study~2 showed that regression-based gradient correction (GACD) successfully isolates true cardiac drift from route geometry ($R^2 = 0.82 \rightarrow -0.03$; H3), providing the quantitative foundation that Meixner et al.'s conceptual framework requires for field deployment. Study~3 demonstrated that multi-session aggregation overcomes the dominant day-to-day variability (57--83\%; H4), with gradient sensitivity reaching adequate reliability at $\geq 6$ sessions (SB $\geq 0.80$). Friel's $< 5\%$ rule \cite{friel2009} represents a pioneering insight for flat or symmetric courses; GACD extends this principle to variable terrain, suggesting that Friel's aerobic-base concept may be applicable to hilly routes where naive DI is dominated by geometry, pending prospective validation. Smyth et al.\ \cite{smyth2022} demonstrated in 82,303 marathon runners that decoupling magnitude and onset predict performance, confirming the practical relevance of field-based decoupling measurement; the present study extends this line of work by identifying the route-geometry component as a major confound and providing a regression-based correction (GACD) applicable beyond the road-marathon context.
 
 Our analyses use $\text{HR}/\text{Speed}$, not $\text{HR}/\text{Power}$. This choice reflects the reality that the majority of field users compute DI from consumer GPS watches without power meters. Whether the two-dimensional structure extends to measured power-based DI remains an open question. However, the Minetti \cite{minetti2002} estimated-power experiment provides an informative boundary: DI computed with estimated metabolic power produced a \textit{stronger} route dependency in the opposite direction (CV $R^2 = 0.57$ vs.\ $0.19$; $r = -0.76$ vs.\ $+0.48$), because the gradient cost function approaches zero on moderate descents ($C_r \approx 0.4$~J/kg/m at $-3\%$), inflating the denominator ratio. Furthermore, the Minetti cost function was originally derived for human walking and running; its application to a dataset dominated by cycling (61.8\%) introduces an inherent bioenergetic mismatch, as cycling efficiency on gradients is governed by distinct biomechanical and aerodynamic constraints (gear ratios, reduced air resistance at lower speeds on climbs). This modality mismatch further amplifies the overcorrection, underscoring that a rigid analytical cost function is difficult to adapt to mixed-sport, real-world data---whereas the data-driven regression approach (GACD) captures modality-specific submaximal relationships directly from the signal. The key contribution of GACD is therefore not contingent on the speed-vs-power distinction: it provides a general framework for isolating cardiac drift from any terrain-confounded ratio.
 
@@ -381,6 +381,10 @@ Gradient sensitivity showed the most balanced profile: SB reaching $0.80$ at $k 
 \section*{Conclusion}
 
 Under speed-based DI, the data support a two-dimensional durability structure rather than the proposed four dimensions (CRQ1), and gradient correction (GACD) successfully isolates true cardiac drift from route geometry. We propose gradient sensitivity and speed sensitivity---the GACD regression coefficients---as route-corrected durability profiling metrics. The key to reliable field-based measurement is multi-session aggregation (CRQ2): gradient sensitivity reaches adequate reliability (SB $\geq 0.80$) at $\geq 6$ sessions, providing a concrete protocol for practitioners. The Person signal (22--43\%) is recoverable through aggregation; the Occasion component (27--53\%) reflects day-to-day physiological variation that may carry information about readiness and recovery. Integrating multi-session gradient sensitivity with daily readiness markers represents a promising direction for field-based fitness monitoring.
+
+% ============================================================
+\section*{Ethics Statement}
+This study is a secondary analysis of the publicly available FitRec dataset \cite{ni2019}, which contains de-identified workout telemetry (heart rate, GPS coordinates, speed, altitude) voluntarily uploaded by Endomondo users. No personally identifiable information (names, dates of birth, or contact details) is present in the dataset. The original data collection was governed by Endomondo's terms of service and privacy policy at the time of upload. As a retrospective analysis of fully anonymised, publicly released data, this study did not require institutional ethics review under standard guidelines for secondary data research. No intervention was performed, and no individual participant can be identified from the analyses or results presented.
 
 % ============================================================
 \section*{Data Availability}
