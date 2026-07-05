@@ -255,9 +255,9 @@ ReI & 1,167 & 1.07 & 0.81 & 1.02 & [0.98, 1.03] \\
 \toprule
  & Eigenvalue & \% Var. & Parallel 95\% & Retain? \\
 \midrule
-PC1 & 1.613 & 53.6 & 1.146 & Yes \\
-PC2 & 1.007 & 33.5 & 1.034 & No \\
-PC3 & 0.388 & 12.9 & 0.974 & No \\
+PC1 & 1.608 & 53.6 & 1.144 & Yes \\
+PC2 & 1.005 & 33.5 & 1.031 & No \\
+PC3 & 0.387 & 12.9 & 0.972 & No \\
 \bottomrule
 \end{tabular}
 \end{table}
@@ -403,7 +403,7 @@ Gradient sensitivity showed the most balanced profile: SB reaching $0.80$ at $k 
 % ============================================================
 \section*{Conclusion}
 
-Under speed-based DI, the data support a two-dimensional durability structure rather than the proposed four dimensions (CRQ1). PCA on standardized person-level medians confirmed this: the first eigenvalue ($1.61$) explained 53.6\% of variance, while the second ($1.01$) fell below the 95th-percentile parallel analysis threshold ($1.034$), justifying a single-factor retention. Gradient correction (GACD) successfully isolates true cardiac drift from route geometry, with VIFs remaining low (median: gradient 2.01, speed 2.09, time 1.07), ensuring coefficient stability. We propose gradient sensitivity and speed sensitivity---the GACD regression coefficients---as route-corrected durability profiling metrics. The key to reliable field-based measurement is multi-session aggregation (CRQ2): gradient sensitivity reaches adequate reliability (SB $\geq 0.80$) at $\geq 5$ sessions, providing a concrete protocol for practitioners. The Person signal (22--44\%) is recoverable through aggregation; the Occasion component (residual variance) remains substantial (56--84\% in single sessions) but reflects day-to-day physiological variation that may carry information about readiness and recovery. Route-matched ICC analysis showed that 18--31 percentage points of this apparent Occasion variance is actually route-related, further validating the necessity of GACD. Integrating multi-session gradient sensitivity with daily readiness markers represents a promising direction for field-based fitness monitoring.
+Under speed-based DI, the data support a two-dimensional durability structure rather than the proposed four dimensions (CRQ1). PCA on standardized person-level medians confirmed this: the first eigenvalue ($1.61$) explained 53.6\% of variance, while the second ($1.01$) fell below the 95th-percentile parallel analysis threshold ($1.031$), justifying a single-factor retention. Gradient correction (GACD) successfully isolates true cardiac drift from route geometry, with VIFs remaining low (median: gradient 2.01, speed 2.09, time 1.07), ensuring coefficient stability. We propose gradient sensitivity and speed sensitivity---the GACD regression coefficients---as route-corrected durability profiling metrics. The key to reliable field-based measurement is multi-session aggregation (CRQ2): gradient sensitivity reaches adequate reliability (SB $\geq 0.80$) at $\geq 5$ sessions, providing a concrete protocol for practitioners. The Person signal (22--44\%) is recoverable through aggregation; the Occasion component (residual variance) remains substantial (56--84\% in single sessions) but reflects day-to-day physiological variation that may carry information about readiness and recovery. Route-matched ICC analysis showed that 18--31 percentage points of this apparent Occasion variance is actually route-related, further validating the necessity of GACD. Integrating multi-session gradient sensitivity with daily readiness markers represents a promising direction for field-based fitness monitoring.
 
 % ============================================================
 \section*{Ethics Statement}
@@ -422,7 +422,7 @@ H.I.\ conceived the study, developed the methodology, performed all analyses, an
 We thank the developers and contributors of the FitRec dataset and the Endomondo community for making the telemetry data available for research.
 
 \section*{Abbreviations}
-\textbf{DI}: Drift Index ($\text{HR}/\text{Speed}$); \textbf{FI}: Flatness Index (gradient sensitivity); \textbf{RI}: Roughness Index (altitude sensitivity); \textbf{GACD}: Gradient-Adjusted Cardiac Drift; \textbf{SB}: Spearman--Brown; \textbf{ICC}: Intraclass Correlation Coefficient; \textbf{VIF}: Variance Inflation Factor.
+\textbf{DI}: Drift Index ($\mathit{HR}/v$); \textbf{FI}: Flatness Index (gradient sensitivity); \textbf{RI}: Roughness Index (altitude sensitivity); \textbf{GACD}: Gradient-Adjusted Cardiac Drift; \textbf{SB}: Spearman--Brown; \textbf{ICC}: Intraclass Correlation Coefficient; \textbf{VIF}: Variance Inflation Factor.
 
 \section*{Data Availability}
 All analysis code and reproducibility scripts are available at \url{https://github.com/ikari12/GRAD}. The FitRec dataset is described in Ni et al.\ (2019) \cite{ni2019}.

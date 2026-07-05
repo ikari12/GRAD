@@ -210,13 +210,21 @@ def main():
 
             if len(climbs) >= 2 and has_speed:
                 climb_speeds = []
-                # Altitude drift check for suspected loops
+                # Physically accurate loop detection via Haversine formula
                 lat = rec.get('latitude', [])
                 lon = rec.get('longitude', [])
                 if len(lat) > 100:
-                    dist_start_end = np.sqrt((lat[0]-lat[-1])**2 + (lon[0]-lon[-1])**2)
-                    # Simple heuristic for loop: start and end are close
-                    if dist_start_end < 0.001: # Approx < 100m
+                    def haversine(la1, lo1, la2, lo2):
+                        R = 6371000  # Earth radius in meters
+                        phi1, phi2 = np.radians(la1), np.radians(la2)
+                        dphi = np.radians(la2 - la1)
+                        dlambda = np.radians(lo2 - lo1)
+                        a = np.sin(dphi/2)**2 + np.cos(phi1)*np.cos(phi2)*np.sin(dlambda/2)**2
+                        return 2 * R * np.arctan2(np.sqrt(a), np.sqrt(1-a))
+
+                    dist_start_end = haversine(lat[0], lon[0], lat[-1], lon[-1])
+                    # Loop detection: start and end within 100m
+                    if dist_start_end < 100:
                         alt_drift = abs(alt[0] - alt[-1])
                         if alt_drift > 50:
                             skip_reasons['alt_drift'] += 1
