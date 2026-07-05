@@ -1,0 +1,52 @@
+======================================================================
+SENSITIVITY ANALYSIS: Temporal Autocorrelation in GACD Regressions
+======================================================================
+Workouts analysed: 300
+Median n_points per workout: 499 (IQR 499–499)
+
+--- Durbin-Watson Statistic ---
+  Median: 0.355
+  Mean:   0.385
+  SD:     0.188
+  IQR:    [0.237, 0.525]
+  Range:  [0.026, 1.115]
+  % with DW < 1.5 (strong positive AC): 100.0%
+  % with 1.5 ≤ DW ≤ 2.5 (acceptable):  0.0%
+  % with DW > 2.5 (negative AC):        0.0%
+
+--- Lag-1 Autocorrelation ---
+  Median: 0.803
+  Mean:   0.791
+  IQR:    [0.727, 0.863]
+
+--- Effective Degrees of Freedom Reduction (AR(1) approximation) ---
+  Median n_eff/n: 0.109
+  Mean n_eff/n:   0.120
+  → Median 89% reduction in effective sample size
+
+--- Newey-West / OLS Standard Error Ratio ---
+  β_gradient  : median ratio = 1.95, mean = 2.14, IQR [1.64, 2.45]
+  β_time      : median ratio = 2.11, mean = 2.14, IQR [1.89, 2.35]
+  β_speed     : median ratio = 2.00, mean = 2.14, IQR [1.75, 2.37]
+
+--- Coefficient Point Estimates (confirm unbiased under autocorrelation) ---
+  β_gradient  : mean = 1.8986, median = 1.6144, SD = 1.5705
+  β_time      : mean = 0.0283, median = 0.0259, SD = 0.1077
+  β_speed     : mean = 0.5353, median = -0.0473, SD = 3.0915
+
+--- OLS R² ---
+  Median: 0.444
+  IQR:    [0.304, 0.590]
+
+[KEY] DW_MEDIAN = 0.355
+[KEY] DW_IQR_LO = 0.237
+[KEY] DW_IQR_HI = 0.525
+[KEY] LAG1_MEDIAN = 0.803
+[KEY] LAG1_IQR_LO = 0.727
+[KEY] LAG1_IQR_HI = 0.863
+[KEY] SE_RATIO_GRAD = 1.95
+[KEY] SE_RATIO_TIME = 2.11
+[KEY] SE_RATIO_SPEED = 2.00
+[KEY] NEFF_RATIO = 0.109
+[KEY] PCT_DW_BELOW_1_5 = 100.0
+[KEY] N_WORKOUTS = 300

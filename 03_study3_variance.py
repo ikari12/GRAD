@@ -115,8 +115,15 @@ print("=" * 60)
 for metric_name, metric_col, short_name, source in METRICS:
     metric_df = get_metric_series(metric_col, source)
     metric_df = metric_df.rename(columns={metric_col: "value"})
-    icc_val = compute_icc_oneway(metric_df, min_workouts=5)
-    print(f"[KEY] icc_{short_name} = {icc_val:.3f}")
+    
+    # All users
+    icc_all = compute_icc_oneway(metric_df, min_workouts=5)
+    print(f"[KEY] icc_{short_name}_all = {icc_all:.3f}")
+    
+    # Hilly subset (Table 5)
+    hilly_df = metric_df[metric_df["alt_range"] > 400]
+    icc_hilly = compute_icc_oneway(hilly_df, min_workouts=2) # Use 2 for hilly to capture sparse sessions
+    print(f"[KEY] icc_{short_name}_hilly = {icc_hilly:.3f}")
 
 
 # ============================================================
@@ -348,10 +355,18 @@ for metric_name, metric_col, short_name, source in METRICS:
     person_metric = metric_df.groupby("userId")[metric_col].median()
     person_speed = metric_df.groupby("userId")["avg_speed"].median()
 
-    # 共通ユーザのみ
+    # Common users for all
     common = person_metric.index.intersection(person_speed.index)
-    r, _ = stats.pearsonr(person_metric[common], person_speed[common])
-    print(f"[KEY] speed_corr_{short_name} = {r:.3f}")
+    r_all, _ = stats.pearsonr(person_metric[common], person_speed[common])
+    print(f"[KEY] speed_corr_{short_name}_all = {r_all:.3f}")
+
+    # Hilly subset (Table 5)
+    hilly_mask = metric_df["alt_range"] > 400
+    hilly_metric = metric_df[hilly_mask].groupby("userId")[metric_col].median()
+    hilly_speed = metric_df[hilly_mask].groupby("userId")["avg_speed"].median()
+    common_hilly = hilly_metric.index.intersection(hilly_speed.index)
+    r_hilly, _ = stats.pearsonr(hilly_metric[common_hilly], hilly_speed[common_hilly])
+    print(f"[KEY] speed_corr_{short_name}_hilly = {r_hilly:.3f}")
 
 
 # ============================================================

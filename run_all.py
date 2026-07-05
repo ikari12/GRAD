@@ -33,7 +33,9 @@ def main():
         "02_study2_artifact.py",
         "03_study3_variance.py",
         "06_supplementary.py",
-        "07_h5_estpower.py"
+        "07_h5_estpower.py",
+        "08_supp_di_route_dist.py",
+        "09_dw_acf_sensitivity.py",
     ]
     
     for script in scripts:

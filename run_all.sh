@@ -170,3 +170,28 @@ echo "========================================"
 echo "Step 5: Figure Generation"
 echo "========================================"
 python3 05_figures.py
+
+# ============================================================
+# Step 6: Supplementary Figure — DI Distribution by Route Type
+# ============================================================
+echo ""
+echo "========================================"
+echo "Step 6: Supplementary Figure (DI Route Distribution)"
+echo "========================================"
+python3 08_supp_di_route_dist.py
+
+# ============================================================
+# Step 7: Sensitivity Analysis — Temporal Autocorrelation
+# ============================================================
+echo ""
+echo "========================================"
+echo "Step 7: Sensitivity Analysis (Durbin-Watson + ACF)"
+echo "========================================"
+echo "  (processes 6GB JSON, ~5-10 min)"
+python3 09_dw_acf_sensitivity.py 2>&1 | tee results/sensitivity_autocorrelation.txt
+
+echo ""
+echo "========================================"
+echo " ✅ ALL STEPS COMPLETED SUCCESSFULLY"
+echo "========================================"
+
