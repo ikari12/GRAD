@@ -192,6 +192,12 @@ python3 09_dw_acf_sensitivity.py 2>&1 | tee results/sensitivity_autocorrelation.
 
 echo ""
 echo "========================================"
+echo "Step 8: Sport-Specific Variance Decomposition"
+echo "========================================"
+python3 10_sport_variance.py 2>&1 | tee results/sport_variance.txt
+
+echo ""
+echo "========================================"
 echo " ✅ ALL STEPS COMPLETED SUCCESSFULLY"
 echo "========================================"
 

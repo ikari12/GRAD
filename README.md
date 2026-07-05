@@ -37,6 +37,7 @@ graph TD
     E --> J[07_h5_estpower.py]
     C & E --> K[08_supp_di_route_dist.py]
     A & E --> L[09_dw_acf_sensitivity.py]
+    A & E --> M[10_sport_variance.py]
     F & G & H --> M[05_figures.py]
     M --> N["paper/Figures/*.png"]
     K --> N
@@ -58,7 +59,8 @@ graph TD
 | `06_supplementary.py` | Extended descriptive statistics + FDR | CSVs | `results/supplementary.txt` |
 | `07_h5_estpower.py` | Estimated-power experiment (Minetti cost) | `endomondoHR.json` | `results/h5_estimated_power.txt` |
 | `08_supp_di_route_dist.py` | **Supp. Figure**: DI distribution by route type | CSVs | `paper/Figures/figS_di_route_distribution.png` |
-| `09_dw_acf_sensitivity.py` | **Sensitivity**: Durbin-Watson + ACF analysis | `endomondoHR.json` | `paper/Figures/figS_dw_acf.png`, `results/sensitivity_autocorrelation.txt` |
+| `09_dw_acf_sensitivity.py` | **Sensitivity**: Durbin-Watson + ACF analysis | `endomondoHR.json` | `paper/Figures/figS_dw.png`, `paper/Figures/figS_acf.png`, `results/sensitivity_autocorrelation.txt` |
+| `10_sport_variance.py` | **Sport-specific**: ICC, SB, variance decomposition by sport | CSVs | `results/sport_variance.txt` |
 
 ---
 
@@ -100,6 +102,9 @@ python 08_supp_di_route_dist.py
 
 # Slow (JSON processing, minutes)
 python 09_dw_acf_sensitivity.py
+
+# Fast (CSV-only, seconds)
+python 10_sport_variance.py
 ```
 
 ---
@@ -135,7 +140,7 @@ GRAD/
 │   ├── Figures/                  # Generated figures
 │   ├── grad.tex                  # Manuscript source
 │   └── references.bib
-├── 00a_compute_4d.py .. 09_dw_acf_sensitivity.py
+├── 00a_compute_4d.py .. 10_sport_variance.py
 ├── run_all.py                    # Full pipeline runner
 ├── run_all.sh                    # Shell-based runner (with download)
 ├── reproduce_all.py              # Minimal reproduction runner

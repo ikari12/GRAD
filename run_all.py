@@ -36,6 +36,7 @@ def main():
         "07_h5_estpower.py",
         "08_supp_di_route_dist.py",
         "09_dw_acf_sensitivity.py",
+        "10_sport_variance.py",
     ]
     
     for script in scripts:
