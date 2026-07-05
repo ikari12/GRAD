@@ -1,0 +1,32 @@
+# GRAD: Gradient-Adjusted Cardiac Drift Analysis Configuration
+# -----------------------------------------------------------------------------
+# All parameters are justified in the paper (grad.tex) and audit reports.
+# Changing these values will require a full re-run of the pipeline.
+
+pipeline:
+  min_workouts_per_user: 5
+  min_workouts_for_reliability: 10
+  n_bootstrap: 2000
+  n_permutations: 1000
+
+filters:
+  min_duration_min: 90      # Cardiac drift onset (Coyle, 2001)
+  min_altitude_range_m: 200  # Minimum terrain for FI/RI calculation
+  min_gps_points: 30         # Stability for half-mean estimation
+  min_moving_speed_kmh: 0.5  # Exclude stationary jitter
+  max_speed_kmh: 150         # Outlier/Sensor error threshold
+  gradient_clip_pct: 50      # Slope limit for rideable/runnable terrain
+
+gradient_bins:
+  flat_boundary_pct: 3
+  steep_boundary_pct: 10
+
+ridge_regression:
+  alphas: [0.01, 0.1, 1.0, 10.0, 100.0]
+  n_folds: 10  # GroupKFold CV
+
+paths:
+  raw_data: "/Users/hisashi/Desktop/Workspace/GRAD/data/endomondoHR.json"
+  processed_4d: "/Users/hisashi/Desktop/Workspace/GRAD/data/meixner_4d_indices.csv"
+  processed_abc: "/Users/hisashi/Desktop/Workspace/GRAD/data/abc_metrics.csv"
+  results_dir: "/Users/hisashi/Desktop/Workspace/GRAD/results/"

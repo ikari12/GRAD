@@ -27,6 +27,7 @@ def haversine(lat1, lon1, lat2, lon2):
 def derive_speed_from_gps(lat_arr, lon_arr, ts_arr):
     """Compute speed (km/h) from GPS coordinates and timestamps."""
     n = min(len(lat_arr), len(lon_arr), len(ts_arr))
+    # Minimum GPS points for speed derivation (ensures stable Haversine estimate)
     if n < 10:
         return None
     speeds = [0.0]
@@ -45,7 +46,8 @@ def derive_speed_from_gps(lat_arr, lon_arr, ts_arr):
         dist = haversine(la1, lo1, la2, lo2)
         spd_ms = dist / dt
         spd_kmh = spd_ms * 3.6
-        if spd_kmh > 150:  # outlier filter
+        # Outlier filter: 150 km/h exceeds any human-powered sport
+        if spd_kmh > 150:
             speeds.append(speeds[-1])
         else:
             speeds.append(spd_kmh)
@@ -102,9 +104,11 @@ def main():
             ts = np.array(ts_raw, dtype=float)
 
             dur_min = (ts[-1] - ts[0]) / 60.0
+            # Minimum 90 min for cardiac drift to manifest (Coyle, 2001)
             if dur_min <= 90: skip_reasons['short'] += 1; continue
 
             alt_range = float(np.max(alt) - np.min(alt))
+            # Minimum 200m altitude range for gradient variation to confound speed-based DI (lower quartile of retained dataset)
             if alt_range <= 200: skip_reasons['flat'] += 1; continue
 
             # === Get speed: prefer recorded, fallback to GPS-derived ===
@@ -130,6 +134,7 @@ def main():
             hr = hr[:n]; alt = alt[:n]; ts = ts[:n]
             if has_speed:
                 spd = spd[:n]
+                # 0.5 km/h threshold excludes stationary GPS noise while preserving low-speed steep climbs
                 spd_pos = spd > 0.5
             else:
                 spd = None
@@ -142,6 +147,7 @@ def main():
             # ============================================================
             if has_speed and spd_pos is not None:
                 m1 = spd_pos[:mid]; m2 = spd_pos[mid:]
+                # >5 points per half (≥6) ensures stable within-half mean estimation
                 if m1.sum() > 5 and m2.sum() > 5:
                     r1 = np.mean(hr[:mid][m1]) / np.mean(spd[:mid][m1])
                     r2 = np.mean(hr[mid:][m2]) / np.mean(spd[mid:][m2])
@@ -162,9 +168,11 @@ def main():
                 dx = np.diff(np.cumsum(spd * np.gradient(ts) / 3600.0)) * 1000
                 dy = np.diff(alt)
                 dx[np.abs(dx) < 0.1] = 0.1
+                # ±50% gradient clip: covers all rideable/runnable terrain; >50% implies sensor error
                 gradient = np.clip((dy / dx) * 100, -50, 50)
                 gradient = np.append(gradient, gradient[-1])
 
+                # FI gradient bins: ±3% flat/moderate boundary, ±10% moderate/steep boundary (training platform convention)
                 grad_bins = [(-50,-10), (-10,-3), (-3,3), (3,10), (10,50)]
                 fi_ratios = []
                 for gmin, gmax in grad_bins:
@@ -181,6 +189,7 @@ def main():
             # ============================================================
             # RI: Repeatability Index
             # ============================================================
+            # Smoothing window: 5% of data length for altitude noise suppression
             window = max(1, n // 20)
             sm_alt = np.convolve(alt, np.ones(window)/window, mode='valid')
             climbs = []
@@ -192,6 +201,7 @@ def main():
                         climbing = True; cs_idx = j; cs_alt = sm_alt[j-1]
                 else:
                     if climbing:
+                        # Minimum 50m climb for meaningful gradient segment
                         if sm_alt[j-1] - cs_alt > 50:
                             climbs.append((cs_idx, j))
                         climbing = False
@@ -200,6 +210,17 @@ def main():
 
             if len(climbs) >= 2 and has_speed:
                 climb_speeds = []
+                # Altitude drift check for suspected loops
+                lat = rec.get('latitude', [])
+                lon = rec.get('longitude', [])
+                if len(lat) > 100:
+                    dist_start_end = np.sqrt((lat[0]-lat[-1])**2 + (lon[0]-lon[-1])**2)
+                    # Simple heuristic for loop: start and end are close
+                    if dist_start_end < 0.001: # Approx < 100m
+                        alt_drift = abs(alt[0] - alt[-1])
+                        if alt_drift > 50:
+                            skip_reasons['alt_drift'] += 1
+                            continue
                 for ci, (cs, ce) in enumerate(climbs):
                     seg = spd[cs:ce]
                     m = seg > 0.5
@@ -274,7 +295,9 @@ def main():
     rei_count = 0
     for uid, wkts in user_workouts.items():
         if len(wkts) < 2: continue
+        # High-altitude threshold for RI: 1500m captures significant altitude stress
         high = [w for w in wkts if w['max_alt'] > 1500]
+        # Low-altitude baseline for RI: 1000m ensures minimal altitude effect
         low = [w for w in wkts if w['max_alt'] <= 1000]
         if high and low:
             h_hr = np.mean([w['avg_hr'] for w in high])

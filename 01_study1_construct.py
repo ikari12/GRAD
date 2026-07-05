@@ -73,6 +73,7 @@ unique_users = np.unique(user_ids)
 user_counts = {u: np.sum(user_ids == u) for u in unique_users}
 
 
+# ≥5 workouts for stable person-level median estimation
 def person_medians(metric: np.ndarray, min_workouts: int = 5) -> tuple:
     """
     ユーザごとの中央値を算出する．
@@ -161,7 +162,7 @@ eigenvalues = eigenvalues[::-1]
 
 # 平行分析: ランダムデータの固有値と比較して因子数を決定
 np.random.seed(42)
-n_perm = 100
+n_perm = 1000  # Horn (1965); Glorfeld (1995) recommend ≥1000 for stable 95th percentile
 random_eigenvalues = np.zeros((n_perm, 3))
 
 for i in range(n_perm):
@@ -258,6 +259,7 @@ first_half_means = []
 second_half_means = []
 
 for u in unique_users:
+    # ≥10 workouts for split-half reliability (≥5 per half)
     if user_counts[u] < 10:
         continue
     mask = user_ids == u
@@ -289,6 +291,7 @@ print("(e) Cross-Validation of DI-FI Correlation (50/50 split, 100 iter)")
 print("=" * 60)
 
 np.random.seed(42)
+# 100 random 50/50 splits for cross-validation stability
 n_cv = 100
 cv_corrs = np.zeros(n_cv)
 

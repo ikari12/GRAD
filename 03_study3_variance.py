@@ -18,7 +18,7 @@ import warnings
 import numpy as np
 import pandas as pd
 from scipy import stats
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import Ridge, RidgeCV
 from sklearn.model_selection import cross_val_score, GroupKFold
 
 warnings.filterwarnings("ignore")
@@ -105,7 +105,7 @@ def compute_icc_oneway(data, user_col="userId", value_col="value", min_workouts=
     n0 = (N - sum(n ** 2 for n in n_per_group) / N) / (k_groups - 1)
 
     icc = (ms_between - ms_within) / (ms_between + (n0 - 1) * ms_within)
-    return icc
+    return icc  # Not floored at 0: negative ICC is informative for reporting (H2)
 
 
 print("\n" + "=" * 60)
@@ -199,9 +199,9 @@ def compute_variance_decomposition(data, user_col="userId", value_col="value",
         route_r2 = 0.0
     else:
         gkf = GroupKFold(n_splits=n_folds)
-        ridge = Ridge(alpha=1.0)
+        ridge = RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0])
         cv_scores = cross_val_score(ridge, X, y, cv=gkf, groups=groups, scoring="r2")
-        route_r2 = max(0, np.mean(cv_scores))
+        route_r2 = max(0, np.mean(cv_scores))  # Floor: negative CV R² means no route signal
 
     pct_person = icc * 100
     pct_route = route_r2 * (1 - icc) * 100
@@ -212,7 +212,7 @@ def compute_variance_decomposition(data, user_col="userId", value_col="value",
 
 def bootstrap_variance_decomposition(data, user_col="userId", value_col="value",
                                      route_features=ROUTE_FEATURES, min_workouts=5,
-                                     n_bootstrap=500):
+                                     n_bootstrap=500):  # 500 bootstrap iterations for variance decomposition CI (computational cost balanced)
     """
     ブートストラップによる分散分解の信頼区間を計算する．
     ユーザを復元抽出してリサンプリングする．
@@ -308,9 +308,15 @@ for metric_name, metric_col, short_name, source in METRICS:
     n_groups = len(np.unique(groups))
     n_folds = min(5, n_groups)
     gkf = GroupKFold(n_splits=n_folds)
-    ridge = Ridge(alpha=1.0)
+    ridge = RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0])
     cv_scores = cross_val_score(ridge, X, y, cv=gkf, groups=groups, scoring="r2")
     mean_cv_r2 = cv_scores.mean()
+
+    # In-sample R² (for Table 1)
+    ridge_in = RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0])
+    ridge_in.fit(X, y)
+    r2_in = ridge_in.score(X, y)
+    print(f"[KEY] route_r2_in_{short_name} = {r2_in:.3f}")
 
     print(f"[KEY] route_r2_cv_{short_name} = {mean_cv_r2:.3f}")
 
@@ -389,6 +395,7 @@ metric_col = "gacd_gradient_coef"
 metric_df = get_metric_series(metric_col, "abc")
 metric_df = metric_df.rename(columns={metric_col: "value"})
 
+# Convergence levels spanning sub-reliable (2-3) to reliable (5-10) aggregation
 for n_agg in [2, 3, 5, 7, 10]:
     # 各ユーザに 2*n_agg 以上のワークアウトが必要
     counts = metric_df.groupby("userId").size()
@@ -398,6 +405,7 @@ for n_agg in [2, 3, 5, 7, 10]:
     group1_means = []
     group2_means = []
 
+    np.random.seed(42)  # Reproducibility for convergence permutation
     for uid, group in sub.groupby("userId"):
         vals = group["value"].values
         vals = np.random.permutation(vals)
@@ -419,6 +427,7 @@ metric_col = "gacd_gradient_coef"
 metric_df = get_metric_series(metric_col, "abc")
 metric_df = metric_df.rename(columns={metric_col: "value"})
 
+# ICC sensitivity check: does minimum-session threshold affect conclusions?
 for thresh in [3, 5, 8, 10, 15]:
     icc_val = compute_icc_oneway(metric_df, min_workouts=thresh)
     print(f"[KEY] icc_thresh_{thresh} = {icc_val:.3f}")

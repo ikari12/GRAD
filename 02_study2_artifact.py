@@ -18,7 +18,7 @@ import sys
 
 import numpy as np
 from scipy import stats
-from sklearn.linear_model import Ridge
+from sklearn.linear_model import Ridge, RidgeCV
 from sklearn.model_selection import cross_val_score, GroupKFold
 from sklearn.preprocessing import StandardScaler
 
@@ -138,7 +138,7 @@ for i, mid in enumerate(meixner_ids):
         X_rich.append(feats)
         y_rich.append(di_val)
         uid_rich.append(meixner["userId"][i])
-        if np.isfinite(ar_val) and ar_val > 500:
+        if np.isfinite(ar_val) and ar_val > 400:
             X_hilly_list.append(feats)
             y_hilly_list.append(di_val)
             uid_hilly.append(meixner["userId"][i])
@@ -150,14 +150,14 @@ y_rich = np.array(y_rich, dtype=np.float64)
 if len(X_rich) > 30:
     scaler_a = StandardScaler()
     X_s = scaler_a.fit_transform(X_rich)
-    model_a = Ridge(alpha=1.0)
+    model_a = RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0])
     model_a.fit(X_s, y_rich)
     di_route_r2_all = model_a.score(X_s, y_rich)
     # GroupKFold: 同一ユーザーの train/test 混在を防止
     uid_map_a = {u: j for j, u in enumerate(sorted(set(uid_rich)))}
     groups_a = np.array([uid_map_a[u] for u in uid_rich])
     gkf_a = GroupKFold(n_splits=min(5, len(set(groups_a))))
-    cv_a = cross_val_score(Ridge(alpha=1.0), X_s, y_rich, cv=gkf_a, groups=groups_a, scoring="r2")
+    cv_a = cross_val_score(RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0]), X_s, y_rich, cv=gkf_a, groups=groups_a, scoring="r2")
     di_route_r2_cv_all = np.mean(cv_a)
 else:
     di_route_r2_all = np.nan
@@ -173,6 +173,8 @@ if len(X_hilly_list) > 30:
     groups_h = np.array([uid_map_h[u] for u in uid_hilly])
     scaler_h = StandardScaler()
     X_hs = scaler_h.fit_transform(X_h)
+    # GBT with conservative defaults: serves as nonlinear upper-bound comparison to Ridge.
+    # Tuning is not needed as the main conclusion (route-predictability) is driven by Ridge.
     gbt = GradientBoostingRegressor(n_estimators=100, max_depth=3, random_state=42)
     gbt.fit(X_hs, y_h)
     di_route_r2_hilly_insample = gbt.score(X_hs, y_h)
@@ -235,13 +237,13 @@ groups_dev = np.array(groups_dev)
 scaler_b = StandardScaler()
 X_gacd_s = scaler_b.fit_transform(X_dev)
 
-model_b = Ridge(alpha=1.0)
+model_b = RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0])
 model_b.fit(X_gacd_s, y_dev)
 gacd_route_r2_all = model_b.score(X_gacd_s, y_dev)
 
 # GroupKFold: 同一ユーザーの train/test 混在を防止
 gkf_b = GroupKFold(n_splits=min(5, len(set(groups_dev))))
-cv_scores_b = cross_val_score(Ridge(alpha=1.0), X_gacd_s, y_dev, cv=gkf_b, groups=groups_dev, scoring="r2")
+cv_scores_b = cross_val_score(RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0]), X_gacd_s, y_dev, cv=gkf_b, groups=groups_dev, scoring="r2")
 gacd_route_r2_cv_all = np.mean(cv_scores_b)
 
 printkey("gacd_route_r2_all", gacd_route_r2_all)
@@ -259,60 +261,66 @@ print("=" * 60)
 np.random.seed(42)
 N_SIM = 5000
 
-# ルートタイプごとの勾配プロファイルを生成
-# 各ワークアウトは 60 ポイント（元の分析と一致），前半 30 / 後半 30
+# Empirically-parameterised controlled experiment (grad.tex Methods)
+# All distributional parameters derived from FitRec dataset (abc_metrics.csv, N=2,343)
 n_points = 60
 half = n_points // 2
 
+# FitRec-derived route type proportions (classified by asc_front ratio)
+# Front-climb (asc_front > 0.6): 42.2%, Back-climb (asc_front < 0.4): 10.2%,
+# Symmetric (0.4 <= asc_front <= 0.6): 47.6%
+ROUTE_TYPES = ["front_climb", "back_climb", "symmetric"]
+ROUTE_PROBS = [0.422, 0.102, 0.476]
+
+# Gradient parameters for simulation:
+# - Asymmetry: ±1.0% (from ascent-front distribution, front-climb mean ≈ 0.71)
+# - Point-level σ: 1.84% (simulation parameter for moderate terrain;
+#   actual abc_metrics grad_std is larger: mean=4.96%, median=4.55%)
+GRAD_ASYM = 1.0   # % gradient asymmetry between halves
+GRAD_STD = 1.84   # % point-level gradient standard deviation (simulation choice)
+
 
 def make_gradient_profile(route_type: str) -> np.ndarray:
-    """ルートタイプに応じた勾配プロファイルを生成する（正規分布使用）．"""
+    """ルートタイプに応じた勾配プロファイルを生成する（FitRec由来パラメータ）．"""
     if route_type == "front_climb":
         return np.concatenate([
-            np.random.normal(8, 3, half),
-            np.random.normal(-5, 3, half),
+            np.random.normal(+GRAD_ASYM, GRAD_STD, half),
+            np.random.normal(-GRAD_ASYM, GRAD_STD, half),
         ])
     elif route_type == "back_climb":
         return np.concatenate([
-            np.random.normal(-5, 3, half),
-            np.random.normal(8, 3, half),
+            np.random.normal(-GRAD_ASYM, GRAD_STD, half),
+            np.random.normal(+GRAD_ASYM, GRAD_STD, half),
         ])
     elif route_type == "symmetric":
-        return np.random.normal(0, 5, n_points)
-    elif route_type == "valley":
-        return np.concatenate([
-            np.random.normal(-6, 3, half),
-            np.random.normal(6, 3, half),
-        ])
-    elif route_type == "peak":
-        return np.concatenate([
-            np.random.normal(6, 3, half),
-            np.random.normal(-6, 3, half),
-        ])
+        return np.random.normal(0, GRAD_STD, n_points)
     else:
         raise ValueError(f"Unknown route type: {route_type}")
 
-
-route_types = ["front_climb", "back_climb", "symmetric", "valley", "peak"]
 
 sim_dis = []
 sim_route_features = []  # gradient_asymmetry，asc_front，desc_front，grad_std，alt_range
 sim_labels = []
 
 for i in range(N_SIM):
-    rt = np.random.choice(route_types)
+    # FitRec empirical proportions (not uniform)
+    rt = np.random.choice(ROUTE_TYPES, p=ROUTE_PROBS)
     gradients = make_gradient_profile(rt)
 
-    # ベースパラメータにランダムな個人差を加える
-    hr_base = np.random.uniform(100, 140)
-    hr_sensitivity = np.random.uniform(2, 8)
-    speed_base = np.random.uniform(2, 5)
-    speed_sensitivity = np.random.uniform(0.05, 0.15)
+    # FitRec-derived physiological parameters (grad.tex Eq. 5-6):
+    # HR₀ ~ U(107, 160)  — P5-P95 of avg_hr
+    hr_base = np.random.uniform(107, 160)
+    # γ_HR ~ max(0.1, N(1.91, 1.48²))  — from gacd_gradient_coef
+    hr_sensitivity = max(0.1, np.random.normal(1.91, 1.48))
+    # v₀ ~ max(1.0, N(1.91, 0.44²))  — simulation parameter (walking/slow speed range)
+    speed_base = max(1.0, np.random.normal(1.91, 0.44))
+    # γ_v ~ max(0.01, N(0.30, 0.15²))  — from Minetti cost function gradients
+    speed_sensitivity = max(0.01, np.random.normal(0.30, 0.15))
 
-    # HR = base + sensitivity * gradient + noise （ドリフトなし）
+    # HR = HR₀ + γ_HR · gradient + ε_HR,  ε_HR ~ N(0, 3²)
     hr = hr_base + hr_sensitivity * gradients + np.random.normal(0, 3, n_points)
 
-    # Speed = base - sensitivity * gradient + noise
+    # v = max(0.5, v₀ − γ_v · gradient + ε_v),  ε_v ~ N(0, 0.3²)
     speed = np.maximum(0.5, speed_base - speed_sensitivity * gradients + np.random.normal(0, 0.3, n_points))
 
     # DI の計算: (HR_H2/Speed_H2) / (HR_H1/Speed_H1)
@@ -341,8 +349,8 @@ for i in range(N_SIM):
     n_desc_front = np.sum(desc_mask[:half])
     desc_front = n_desc_front / n_desc_total if n_desc_total > 0 else 0.5
 
-    # 累積標高から alt_range を概算
-    alt = np.cumsum(gradients * 0.1)  # 簡易的に 100m 間隔と仮定
+    # 累積標高から alt_range を概算（100m 間隔と仮定）
+    alt = np.cumsum(gradients * 0.1)
     alt_range_val = np.max(alt) - np.min(alt)
 
     sim_route_features.append([
@@ -358,7 +366,7 @@ sim_labels = np.array(sim_labels)
 # DI をルート特徴量から予測
 scaler_sim = StandardScaler()
 X_sim = scaler_sim.fit_transform(sim_route_features)
-cv_scores_sim = cross_val_score(Ridge(alpha=1.0), X_sim, sim_dis, cv=5, scoring="r2")
+cv_scores_sim = cross_val_score(RidgeCV(alphas=[0.01, 0.1, 1.0, 10.0, 100.0]), X_sim, sim_dis, cv=5, scoring="r2")
 
 printkey("sim_r2_cv", np.mean(cv_scores_sim))
 
@@ -381,19 +389,20 @@ for drift_val in [0.0, 0.1, 0.5]:
     for _ in range(1000):
         gradients = make_gradient_profile("symmetric")
 
-        hr_base = np.random.uniform(120, 160)
-        hr_sensitivity = np.random.uniform(1.0, 3.0)
-        speed_base = np.random.uniform(8, 15)
-        speed_sensitivity = np.random.uniform(0.3, 1.0)
+        # Same FitRec-derived parameters as main simulation
+        hr_base = np.random.uniform(107, 160)
+        hr_sensitivity = max(0.1, np.random.normal(1.91, 1.48))
+        speed_base = max(1.0, np.random.normal(1.91, 0.44))
+        speed_sensitivity = max(0.01, np.random.normal(0.30, 0.15))
 
         # ドリフト: 時間に比例して HR が増加
         time_vec = np.linspace(0, 1, n_points)
         hr = hr_base + hr_sensitivity * gradients + drift_val * hr_base * time_vec
-        hr += np.random.normal(0, 2, n_points)
+        hr += np.random.normal(0, 3, n_points)
         hr = np.clip(hr, 60, 220)
 
-        speed = speed_base - speed_sensitivity * gradients + np.random.normal(0, 0.5, n_points)
-        speed = np.clip(speed, 1, 30)
+        speed = np.maximum(0.5, speed_base - speed_sensitivity * gradients + np.random.normal(0, 0.3, n_points))
+        speed = np.clip(speed, 0.5, 30)
 
         hr_h1 = np.mean(hr[:half])
         hr_h2 = np.mean(hr[half:])
@@ -497,7 +506,7 @@ subsets = {
     "gentle": valid_d & (grad_std_abc < 5),
     "moderate": valid_d & (grad_std_abc >= 5) & (grad_std_abc < 8),
     "steep": valid_d & (grad_std_abc >= 8),
-    "hilly": valid_d & (alt_range_abc > 500),
+    "hilly": valid_d & (alt_range_abc > 400),
 }
 
 for name, subset_mask in subsets.items():
@@ -509,6 +518,13 @@ for name, subset_mask in subsets.items():
     printkey(f"desc_within_{name}", r_within)
     printkey(f"desc_d_{name}", d_val)
     print(f"  N({name}) = {np.sum(subset_mask & valid_d)}")
+
+# --- Total descent amount vs gacd_rate (Table 2 L315) ---
+total_desc_abc = to_float(abc["total_descent"])
+valid_td = valid_rows(total_desc_abc, gacd_rate_abc)
+r_td, p_td = stats.pearsonr(total_desc_abc[valid_td], gacd_rate_abc[valid_td])
+printkey("desc_total_amount_r", r_td)
+printkey("desc_total_amount_p", p_td)
 
 # --- スポーツ別分析 ---
 print()

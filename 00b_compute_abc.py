@@ -60,19 +60,23 @@ def compute_metrics(rec):
     dur_min = t_min[-1]
     if dur_min < 5: return None
 
+    # Convert speed from km/h (FitRec raw) to m/s for gradient computation
+    # FitRec records speed in km/h; regression requires m/s for consistent units
+    spd_ms = spd / 3.6  # m/s
+
     # Compute point-to-point gradient
     dt = np.diff(ts)
     dt[dt < 0.1] = 0.1
     d_alt = np.diff(alt)
-    d_dist = spd[:-1] * dt  # horizontal distance in meters (speed is m/s)
+    d_dist = spd_ms[:-1] * dt  # horizontal distance in meters (speed in m/s × time in s)
     d_dist[d_dist < 0.1] = 0.1
     gradient = (d_alt / d_dist) * 100.0  # percent
-    gradient = np.clip(gradient, -50, 50)  # reasonable range
+    gradient = np.clip(gradient, -50, 50)  # reasonable range: ±50% covers all rideable/runnable terrain; >50% implies sensor error
 
     # Align arrays (n-1 points for gradient)
     hr_mid = (hr[:-1] + hr[1:]) / 2  # midpoint HR
     t_mid = (t_min[:-1] + t_min[1:]) / 2  # midpoint time
-    spd_mid = (spd[:-1] + spd[1:]) / 2
+    spd_mid = (spd_ms[:-1] + spd_ms[1:]) / 2  # midpoint speed in m/s
     alt_mid = (alt[:-1] + alt[1:]) / 2
 
     m = len(gradient)
@@ -121,6 +125,26 @@ def compute_metrics(rec):
     resid_h2 = residuals[half:].mean()
     gacd_resid_drift = resid_h2 - resid_h1  # positive = unexplained HR increase in 2nd half
 
+    # VIF (Variance Inflation Factor) for each predictor
+    # X_a columns: [intercept, gradient, time, speed]
+    # VIF_j = 1/(1-R²_j) where R²_j = OLS(X_j ~ other X's)
+    X_preds = X_a[:, 1:]  # exclude intercept
+    vifs = np.full(3, np.nan)  # gradient, time, speed
+    for j in range(3):
+        y_j = X_preds[:, j]
+        X_others = np.column_stack([np.ones(len(y_j))] +
+                                   [X_preds[:, k] for k in range(3) if k != j])
+        try:
+            b_j, _, _, _ = np.linalg.lstsq(X_others, y_j, rcond=None)
+            pred_j = X_others @ b_j
+            ss_res_j = np.sum((y_j - pred_j)**2)
+            ss_tot_j = np.sum((y_j - y_j.mean())**2)
+            r2_j = 1 - ss_res_j / ss_tot_j if ss_tot_j > 0 else 0
+            vifs[j] = 1.0 / (1.0 - r2_j) if r2_j < 1.0 else 999.0
+        except:
+            vifs[j] = np.nan
+    vif_gradient, vif_time, vif_speed = vifs[0], vifs[1], vifs[2]
+
     # ================================================================
     # B. Personal HR-Terrain Response Coefficients
     # Stored per-workout for later aggregation at user level
@@ -154,6 +178,8 @@ def compute_metrics(rec):
     # Compare early vs late recovery
     # ================================================================
     # Identify descent segments: gradient < -3% for ≥ 5 consecutive points
+    # -3% matches the flat/moderate bin boundary in FI computation (H3);
+    # ≥5 points ensures sustained descent rather than GPS jitter (~15-25s at typical sampling)
     descents = []
     in_descent = False; d_start = 0
     for i in range(m):
@@ -180,7 +206,9 @@ def compute_metrics(rec):
         hr_drop = hr_peak - hr_min
         t_drop = t_seg[t_seg <= t_seg[hr_seg.argmin()]][-1] - t_seg[0] if hr_seg.argmin() > 0 else 0
 
-        if t_drop > 0.5 and hr_drop > 3:  # at least 30s and 3bpm drop
+        # Minimum 0.5 min (30s) to exclude transient fluctuations;
+        # minimum 3 bpm drop to exclude noise (optical HR sensor noise floor ~2-3 bpm)
+        if t_drop > 0.5 and hr_drop > 3:
             rec_speed = hr_drop / t_drop  # bpm per minute
             recovery_speeds.append(rec_speed)
             recovery_times.append(t_mid[d_s] / dur_min)  # fraction of workout
@@ -246,6 +274,9 @@ def compute_metrics(rec):
         'gacd_r2': gacd_r2,                  # model fit
         'gacd_residual_std': gacd_residual_std,
         'gacd_resid_drift': gacd_resid_drift,  # unexplained H2-H1 drift
+        'vif_gradient': vif_gradient,          # VIF for gradient predictor
+        'vif_time': vif_time,                  # VIF for time predictor
+        'vif_speed': vif_speed,                # VIF for speed predictor
         'hr_progression': hr_progression,      # total gradient-adjusted HR drift
         # B: Personal response
         'hr_gradient_sensitivity': hr_gradient_sensitivity,

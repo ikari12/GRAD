@@ -134,7 +134,7 @@ print("S2. Measurement Error vs True Occasion Separation")
 print("=" * 60)
 
 # Strategy: compute ICC for users who repeated SIMILAR routes
-# (same altitude range ±20%, same total ascent ±20%, same duration ±30%)
+# Route-matching tolerances: ±20% altitude/ascent accounts for GPS altimeter precision (~±10m); ±30% duration for pace variation
 # This "route-matched" ICC should be HIGHER than the overall ICC,
 # because route variance is controlled. The difference tells us
 # how much of the residual is route vs true occasion.
@@ -164,6 +164,9 @@ def compute_icc_oneway(user_groups):
     if MSW == 0 and MSB == 0:
         return np.nan
     icc = (MSB - MSW) / (MSB + (k0 - 1) * MSW)
+    # Floor at 0: negative ICC(1,1) indicates MSB < MSW (between-person variance
+    # less than within-person), implying no trait-level signal; following Shrout &
+    # Fleiss (1979) convention for one-way random effects.
     return max(0, icc)
 
 # Overall ICC
@@ -221,6 +224,7 @@ for metric_name, metric_vals in [("gacd", abc_gacd), ("gradsens", abc_gradsens),
     print(f"[KEY] icc_route_matched_{metric_name} = {icc_route_matched:.3f}")
     print(f"[KEY] icc_diff_{metric_name} = {icc_route_matched - icc_all:.3f}")
     print(f"[KEY] n_route_matched_{metric_name} = {route_matched_count}")
+    print(f"[KEY] n_users_route_matched_{metric_name} = {len(user_route_groups)}")
 
 # Summary: estimate upper bound on measurement error
 # If route-matched ICC is X and overall ICC is Y, then:
@@ -297,6 +301,7 @@ eigenvalues = eigenvalues[idx]
 eigenvectors = eigenvectors[:, idx]
 
 # Parallel analysis (Monte Carlo)
+# Horn (1965); Glorfeld (1995) recommend ≥1000 for stable 95th percentile
 n_iter = 1000
 random_eigenvalues = np.zeros((n_iter, 3))
 for it in range(n_iter):
@@ -380,6 +385,38 @@ for metric_name, metric_vals in [("gacd", abc_gacd), ("gradsens", abc_gradsens),
         print(f"[KEY] converge_{metric_name}_k{k}_sh = {r_sh:.3f}")
         print(f"[KEY] converge_{metric_name}_k{k}_sb = {sb:.3f}")
 
+# DI convergence (from meixner data, since DI is not in abc)
+di_meix = to_float_array(meixner["DI"])
+meix_uids = list(meixner["userId"])
+di_user_vals = {}
+for i, uid in enumerate(meix_uids):
+    if np.isfinite(di_meix[i]):
+        di_user_vals.setdefault(uid, []).append(di_meix[i])
+
+print(f"\n  di (from meixner):")
+print(f"    {'k':<5} {'Split-half r':<14} {'SB reliability':<16} {'Status'}")
+for k in range(2, 11):
+    eligible = {u: v[:k] for u, v in di_user_vals.items() if len(v) >= k}
+    if len(eligible) < 10:
+        print(f"    {k:<5} {'n/a':<14} {'n/a':<16} (n<10)")
+        continue
+    odd_means = []
+    even_means = []
+    for u, vals in eligible.items():
+        odd = [vals[j] for j in range(0, k, 2)]
+        even = [vals[j] for j in range(1, k, 2)]
+        if len(odd) > 0 and len(even) > 0:
+            odd_means.append(np.mean(odd))
+            even_means.append(np.mean(even))
+    if len(odd_means) < 5:
+        continue
+    r_sh = np.corrcoef(odd_means, even_means)[0, 1]
+    sb = 2 * r_sh / (1 + r_sh) if r_sh > 0 else 0
+    status = "✓ ≥0.80" if sb >= 0.80 else "  <0.80"
+    print(f"    {k:<5} {r_sh:<14.3f} {sb:<16.3f} {status}")
+    print(f"[KEY] converge_di_k{k}_sh = {r_sh:.3f}")
+    print(f"[KEY] converge_di_k{k}_sb = {sb:.3f}")
+
 
 # ============================================================
 # S5. FDR CORRECTION FOR EXPLORATORY P-VALUES
@@ -461,6 +498,182 @@ n_sig = sum(1 for p in fdr_adjusted if p < 0.05)
 print(f"\n  {n_sig}/{n_tests} tests remain significant after FDR correction")
 print(f"[KEY] fdr_n_significant = {n_sig}")
 print(f"[KEY] fdr_n_tests = {n_tests}")
+
+
+# ============================================================
+# S6. DI ROUTE PREDICTION & WITHIN-PERSON DESCENT COUNTS
+# ============================================================
+print("\n" + "=" * 60)
+print("S6. DI Route Prediction, Within-Person Descent, VIF")
+print("=" * 60)
+
+from sklearn.linear_model import RidgeCV
+from sklearn.model_selection import GroupKFold, cross_val_score
+
+# DI route prediction (R²_in and R²_CV) — meixner data, 6 features
+# Uses same cross_val_score method as 03 for consistency
+meix_route_features = ["total_ascent", "total_descent", "alt_range", "max_alt",
+                        "dur_min", "n_climbs"]
+avail_feats = [f for f in meix_route_features if f in meixner]
+if len(avail_feats) >= 3:
+    X_list, y_list, g_list = [], [], []
+    for i in range(len(di_meix)):
+        if not np.isfinite(di_meix[i]):
+            continue
+        row = []
+        valid_row = True
+        for f in avail_feats:
+            v = to_float_array([meixner[f][i]])[0]
+            if not np.isfinite(v):
+                valid_row = False
+                break
+            row.append(v)
+        if not valid_row:
+            continue
+        X_list.append(row)
+        y_list.append(di_meix[i])
+        g_list.append(meix_uids[i])
+
+    X_di = np.array(X_list)
+    y_di = np.array(y_list)
+    g_di = np.array(g_list)
+
+    # Filter users with >= 3 workouts (DI uses all meixner users, not >=5 abc threshold)
+    from collections import Counter
+    uid_counts_di = Counter(g_di)
+    mask_3 = np.array([uid_counts_di[g_di[i]] >= 3 for i in range(len(g_di))])
+    X_f = X_di[mask_3]
+    y_raw = y_di[mask_3]
+    g_f = g_di[mask_3]
+
+    # Within-person deviation
+    uid_means_di = {}
+    for i in range(len(g_f)):
+        uid_means_di.setdefault(g_f[i], []).append(y_raw[i])
+    for u in uid_means_di:
+        uid_means_di[u] = np.mean(uid_means_di[u])
+    y_f = np.array([y_raw[i] - uid_means_di[g_f[i]] for i in range(len(y_raw))])
+
+    # In-sample R²
+    ridge_in = RidgeCV(alphas=[0.01, 0.1, 1.0, 10, 100])
+    ridge_in.fit(X_f, y_f)
+    r2_in = ridge_in.score(X_f, y_f)
+
+    # CV R² using cross_val_score (same as 03)
+    unique_users = np.unique(g_f)
+    n_groups = min(5, len(unique_users))
+    gkf = GroupKFold(n_splits=n_groups)
+    ridge_cv = RidgeCV(alphas=[0.01, 0.1, 1.0, 10, 100])
+    cv_scores = cross_val_score(ridge_cv, X_f, y_f, cv=gkf, groups=g_f, scoring="r2")
+    r2_cv = cv_scores.mean()
+
+    print(f"  DI route prediction (meixner, {len(avail_feats)} features, >=3 wkts):")
+    print(f"    R²_in  = {r2_in:.4f}")
+    print(f"    R²_CV  = {r2_cv:.4f}")
+    print(f"[KEY] route_r2_in_di = {r2_in:.4f}")
+    print(f"[KEY] route_r2_cv_di = {r2_cv:.4f}")
+
+# Within-person descent analysis counts
+from scipy import stats as sp_stats
+
+desc_front_abc = to_float_array(abc["desc_front"])
+gacd_rate_abc = to_float_array(abc["gacd_rate"])
+valid_d = np.isfinite(desc_front_abc) & np.isfinite(gacd_rate_abc)
+users_abc = np.array(list(abc["userId"]))
+
+user_rs = []
+for u in np.unique(users_abc[valid_d]):
+    u_mask = valid_d & (users_abc == u)
+    if np.sum(u_mask) < 5:
+        continue
+    df_u = desc_front_abc[u_mask]
+    gr_u = gacd_rate_abc[u_mask]
+    if np.std(df_u) < 1e-10 or np.std(gr_u) < 1e-10:
+        continue
+    r_u = np.corrcoef(df_u, gr_u)[0, 1]
+    if not np.isnan(r_u):
+        user_rs.append(r_u)
+
+n_wp = len(user_rs)
+n_pos = sum(1 for r in user_rs if r > 0)
+pct_pos = n_pos / n_wp * 100 if n_wp > 0 else 0
+mean_r = np.mean(user_rs) if user_rs else 0
+
+print(f"\n  Within-person descent analysis:")
+print(f"    N users (min 5 workouts): {n_wp}")
+print(f"    Positive correlations: {n_pos}/{n_wp} ({pct_pos:.1f}%)")
+print(f"    Mean r: {mean_r:.4f}")
+print(f"[KEY] desc_n_within_users = {n_wp}")
+print(f"[KEY] desc_n_positive = {n_pos}")
+print(f"[KEY] desc_pct_positive = {pct_pos:.1f}")
+
+# VIF summary (if VIF columns exist in abc)
+if "vif_gradient" in abc and "vif_speed" in abc and "vif_time" in abc:
+    vif_g = to_float_array(abc["vif_gradient"])
+    vif_s = to_float_array(abc["vif_speed"])
+    vif_t = to_float_array(abc["vif_time"])
+
+    valid_vif = np.isfinite(vif_g) & np.isfinite(vif_s) & np.isfinite(vif_t)
+    vif_g_v = vif_g[valid_vif]
+    vif_s_v = vif_s[valid_vif]
+    vif_t_v = vif_t[valid_vif]
+
+    med_vif_g = np.median(vif_g_v)
+    med_vif_s = np.median(vif_s_v)
+    med_vif_t = np.median(vif_t_v)
+
+    # Percentage below thresholds (max of 3 VIFs per workout)
+    max_vif = np.maximum(vif_g_v, np.maximum(vif_s_v, vif_t_v))
+    pct_below_10 = np.mean(max_vif < 10) * 100
+    pct_below_5 = np.mean(max_vif < 5) * 100
+
+    print(f"\n  VIF summary ({len(vif_g_v)} workouts):")
+    print(f"    Median VIF gradient: {med_vif_g:.2f}")
+    print(f"    Median VIF speed:    {med_vif_s:.2f}")
+    print(f"    Median VIF time:     {med_vif_t:.2f}")
+    print(f"    % workouts all VIF < 10: {pct_below_10:.1f}%")
+    print(f"    % workouts all VIF < 5:  {pct_below_5:.1f}%")
+    print(f"[KEY] median_vif_gradient = {med_vif_g:.2f}")
+    print(f"[KEY] median_vif_speed = {med_vif_s:.2f}")
+    print(f"[KEY] median_vif_time = {med_vif_t:.2f}")
+    print(f"[KEY] pct_vif_below_10 = {pct_below_10:.1f}")
+    print(f"[KEY] pct_vif_below_5 = {pct_below_5:.1f}")
+else:
+    print("\n  ⚠️ VIF columns not found in abc_metrics.csv — run 00b first to generate VIF data")
+
+# Effort intensity correlation with route-matched residual
+# "effort intensity" = mean HR (proxy for exercise intensity)
+# Correlation between avg_hr and route-matched occasion residual (gacd_rate)
+# Use within-person deviation of gacd_rate vs avg_hr
+abc_avg_hr = to_float_array(abc["avg_hr"])
+valid_eff = np.isfinite(gacd_rate_abc) & np.isfinite(abc_avg_hr)
+# Within-person deviations
+eff_users = {}
+for i in range(len(users_abc)):
+    if valid_eff[i]:
+        eff_users.setdefault(users_abc[i], []).append(i)
+
+# Compute within-person correlation: for each user, correlate HR deviation with GACD deviation
+eff_dev_hr = []
+eff_dev_gacd = []
+for uid, indices in eff_users.items():
+    if len(indices) < 3:
+        continue
+    hrs = abc_avg_hr[indices]
+    gacds = gacd_rate_abc[indices]
+    hr_mean = np.mean(hrs)
+    gacd_mean = np.mean(gacds)
+    for i in indices:
+        eff_dev_hr.append(abc_avg_hr[i] - hr_mean)
+        eff_dev_gacd.append(gacd_rate_abc[i] - gacd_mean)
+
+if len(eff_dev_hr) > 10:
+    r_effort, p_effort = sp_stats.pearsonr(eff_dev_hr, eff_dev_gacd)
+    print(f"\n  Effort intensity correlation (within-person avg_hr vs gacd_rate deviation):")
+    print(f"    r = {r_effort:.4f}, p = {p_effort:.4f}")
+    print(f"[KEY] effort_intensity_r = {r_effort:.4f}")
+    print(f"[KEY] effort_intensity_p = {p_effort:.4f}")
+
 
 print("\n" + "=" * 60)
 print("All supplementary analyses complete.")
