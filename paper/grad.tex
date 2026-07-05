@@ -79,7 +79,7 @@ Three exploratory hypotheses were also examined:
 
 We used the FitRec dataset \cite{ni2019}, comprising 253,020 GPS-tracked workouts from Endomondo. Each workout record $j$ contains irregularly time-stamped arrays of heart rate ($\mathit{HR}_{j,i}$, optical wrist sensor, $\mathrm{bpm}$), speed ($v_{j,i}$, GPS-derived, $\mathrm{km{\cdot}h^{-1}}$ in the raw data), altitude ($a_{j,i}$, barometric or GPS-derived, $\mathrm{m}$), and geographic coordinates, where $i = 1, \ldots, N_j$ indexes the data points. Where the recorded speed array was missing or shorter than 10 points, speed was derived from GPS coordinates via the Haversine formula (values exceeding $150\,\mathrm{km{\cdot}h^{-1}}$ were excluded as outliers). The gender variable indicates 94.6\% male, 4.8\% female, 1.2\% unknown; age, body mass, and training history are unavailable. Sensor make and firmware version are not recorded.
 
-A four-step inclusion pipeline was applied: (1)~HR, altitude, and speed arrays each required $N_j \geq 30$ finite data points (a minimum for stable within-half mean estimation with $\geq 15$ points per half); missing values were linearly interpolated between flanking valid points; (2)~total duration $T_j = t_{N_j} - t_1 > 90\,\mathrm{min}$, ensuring sufficient exercise duration for cardiac drift to manifest \cite{coyle2001}; (3)~altitude range $\Delta a_j = \max_i(a_i) - \min_i(a_i) > 200\,\mathrm{m}$, a conservative threshold for ensuring sufficient gradient variation to confound the speed-based DI (approximately the lower quartile of the retained dataset; median $= 349\,\mathrm{m}$). To address sensor-induced barometric drift, we required that the start-to-end altitude deviation $|\Delta a_{\text{drift}}| = |a_{N_j} - a_1| < 50\,\mathrm{m}$ for routes suspected to be loops ($> 80\%$ overlap); (4)~each temporal half (H1: $i \leq \lfloor N_j/2 \rfloor$; H2: $i > \lfloor N_j/2 \rfloor$) required $> 5$ points with $v_i > 0.5\,\mathrm{km{\cdot}h^{-1}}$ (i.e., $\geq 6$ per half), where $0.5\,\mathrm{km{\cdot}h^{-1}}$ excludes stationary GPS noise while preserving low-speed segments on steep climbs.
+A four-step inclusion pipeline was applied: (1)~HR, altitude, and speed arrays each required $N_j \geq 30$ finite data points (a minimum for stable within-half mean estimation with $\geq 15$ points per half); missing values were linearly interpolated between flanking valid points; (2)~total duration $T_j = t_{N_j} - t_1 > 90\,\mathrm{min}$, ensuring sufficient exercise duration for cardiac drift to manifest \cite{coyle2001}; (3)~altitude range $\Delta a_j = \max_i(a_i) - \min_i(a_i) > 200\,\mathrm{m}$, a conservative threshold for ensuring sufficient gradient variation to confound the speed-based DI (approximately the lower quartile of the retained dataset; median $= 349\,\mathrm{m}$). To address sensor-induced barometric drift, we required that the start-to-end altitude deviation $|\Delta a_{\text{drift}}| = |a_{N_j} - a_1| < 50\,\mathrm{m}$ for routes suspected to be loops ($> 80\%$ overlap); (4)~each temporal half (H1: $i \leq \lfloor N_j/2 \rfloor$; H2: $i > \lfloor N_j/2 \rfloor$) required $> 5$ points with $v_i > 0.5\,\mathrm{km{\cdot}h^{-1}}$ (i.e., $\geq 6$ per half), where $0.5\,\mathrm{km{\cdot}h^{-1}}$ excludes stationary GPS noise while preserving low-speed segments on steep climbs. When speed was entirely unavailable, a heart-rate-only DI ($= \bar{\text{HR}}_{\text{H2}} / \bar{\text{HR}}_{\text{H1}}$) was computed as a fallback; FI and RI required speed.
 
 This yielded $N = 13{,}750$ workouts from $K = 675$ users for Study~1 (cycling 61.8\%, running 16.9\%, mountain biking 16.7\%, other 4.6\%; median duration $181\,\mathrm{min}$ [IQR 132--265]; median altitude range $349\,\mathrm{m}$ [IQR 263--545]; median HR $135\,\mathrm{bpm}$ [IQR 125--145]). Studies~2--3 required $\geq 5$ repeated workouts per user, yielding 2,343 workouts from 314 users.
 
@@ -112,14 +112,12 @@ Workouts with $m < 2$ received no RI.
   d_i &= \max(v_i \cdot \Delta t_i,\; 0.1\,\mathrm{m}), \quad \Delta t_i = \max(t_{i+1} - t_i,\; 0.1\,\mathrm{s})
 \end{align*}
 Note that the minimum distance floor is $0.1\,\mathrm{m}$ (not $0.5\,\mathrm{m}$ as in FI), reflecting the finer resolution needed for regression. All variables were evaluated at midpoints: $\text{HR}^*_i = (\text{HR}_i + \text{HR}_{i+1})/2$, $v^*_i = (v_i + v_{i+1})/2$, $t^*_i = (t_i + t_{i+1})/2\,\mathrm{(min)}$. On the subset of valid indices ($|\mathcal{V}| \geq 20$ required), the OLS regression:
-\begin{equation}
-  \mathit{HR}^*_i = \beta_0 + \beta_{\text{grad}} \, g_i + \beta_{\text{speed}} \, v^*_i + \beta_{\text{time}} \, t^*_i + \varepsilon_i
-\end{equation}
+\begin{align}
+  \mathit{HR}^*_i &= \beta_0 + \beta_{\text{grad}} \, g_i + \beta_{\text{speed}} \, v^*_i + \beta_{\text{time}} \, t^*_i + \varepsilon_i, \label{eq:gacd} \\
+  \hat{\boldsymbol{\beta}} &= (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y} \nonumber
+\end{align}
 Linearity was confirmed via residual analysis, with homoscedasticity observed across the primary speed and gradient ranges.
-\begin{align*}
-  \hat{\boldsymbol{\beta}} &= (\mathbf{X}^\top \mathbf{X})^{-1} \mathbf{X}^\top \mathbf{y}
-\end{align*}
-where $\mathbf{X} \in \mathbb{R}^{|\mathcal{V}| \times 4}$ (intercept, $g$, $v^*$, $t^*$) yielded: (4)~GACD ($\hat{\beta}_{\text{time}}$, $\mathrm{bpm{\cdot}min^{-1}}$); (5)~Gradient sensitivity ($\hat{\beta}_{\text{grad}}$, $\mathrm{bpm{\cdot}\%^{-1}}$); (6)~Speed sensitivity ($\hat{\beta}_{\text{speed}}$, $\mathrm{bpm{\cdot}(m{\cdot}s^{-1})^{-1}}$). Per-workout $R^2 = 1 - \|\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}\|^2 / \|\mathbf{y} - \bar{y}\mathbf{1}\|^2$. Point-level gradients were clipped to $\pm 50\%$, as values beyond this range exceed the steepest rideable/runnable terrain and indicate sensor artifacts. Although gradient ($g_i$) and speed ($v^*_i$) exhibit collinearity in field environments, Multicollinearity was minimal (median VIF: gradient 2.01, speed 2.09, time 1.07), with 99.8\% of sessions falling below the VIF $< 10$ threshold (92.4\% below 5) \cite{hair2010}.
+where $\mathbf{X} \in \mathbb{R}^{|\mathcal{V}| \times 4}$ (intercept, $g$, $v^*$, $t^*$) yielded: (4)~GACD ($\hat{\beta}_{\text{time}}$, $\mathrm{bpm{\cdot}min^{-1}}$); (5)~Gradient sensitivity ($\hat{\beta}_{\text{grad}}$, $\mathrm{bpm{\cdot}\%^{-1}}$); (6)~Speed sensitivity ($\hat{\beta}_{\text{speed}}$, $\mathrm{bpm{\cdot}(m{\cdot}s^{-1})^{-1}}$). Per-workout $R^2 = 1 - \|\mathbf{y} - \mathbf{X}\hat{\boldsymbol{\beta}}\|^2 / \|\mathbf{y} - \bar{y}\mathbf{1}\|^2$. Point-level gradients were clipped to $\pm 50\%$, as values beyond this range exceed the steepest rideable/runnable terrain and indicate sensor artifacts. Although gradient ($g_i$) and speed ($v^*_i$) exhibit collinearity in field environments, multicollinearity was minimal (median VIF: gradient 2.01, speed 2.09, time 1.07), with 99.8\% of sessions falling below the VIF $< 10$ threshold (92.4\% below 5) \cite{hair2010}.
 
 \subsection*{Estimated Power Experiment}
 
@@ -238,7 +236,7 @@ All ICCs fell below 0.50: DI $= 0.16$, FI $= 0.08$, RI $= 0.10$ (H2 confirmed). 
 \label{tab:descriptive}
 \begin{tabular}{@{}lccccc@{}}
 \toprule
-Metric & $N$ & Mean & SD & Median & Range [5\%, 95\%] \\
+Metric & $N$ & Mean & SD & Median & IQR [Q1, Q3] \\
 \midrule
 DI & 13,549 & 0.92 & 0.26 & 0.92 & [0.78, 1.04] \\
 FI & 13,742 & 1.06 & 0.23 & 1.04 & [0.95, 1.14] \\
@@ -386,9 +384,6 @@ Speed corr.\ ($r$) & --- & \textbf{+0.36} & --- \\
 }
 \end{table}
 
-\section*{Data Availability}
-All analysis code and reproducibility scripts are available at \url{https://github.com/ikari12/GRAD}. The FitRec dataset is described in Ni et al.\ (2019) \cite{ni2019}.
-
 The recommended protocol is: (1)~apply GACD regression to remove route-geometry artifacts from each session, (2)~extract gradient and speed sensitivity as the individual's durability profile, and (3)~aggregate $\geq 5$ sessions for stable estimates. Sport-specific baselines are required, as gradient sensitivity varies substantially across modalities (cycling $+2.11$ bpm/\%, MTB $+1.17$, running $+0.47$; $F = 117.6$, $\eta^2 = 0.092$).
 
 The ICC--SB discrepancy (E3) offers additional practical insight: rank-order consistency is preserved despite session-to-session variation. This means within-person \textit{trends} across training blocks are interpretable, even when individual sessions vary. Coaches and athletes can track gradient sensitivity trends with confidence, provided they aggregate $\geq 5$ sessions per assessment window.
@@ -403,12 +398,12 @@ Gradient sensitivity showed the most balanced profile: SB reaching $0.80$ at $k 
 
 \subsection*{Limitations}
 
-(1)~\textit{Speed-based DI}: our DI uses $\text{HR}/\text{Speed}$, not $\text{HR}/\text{Power}$. The route artifact (C1) is specific to speed-based DI; H1, H2, H4 may differ for power-based DI. (2)~Secondary data with uncontrolled sensor quality. (3)~Residual--noise conflation: route-matched ICC partially addresses this, but full separation requires research-grade sensors. (4)~No gold standard (VO$_2$max, power). (5)~Demographics: 94\% male; age and training history unknown. (6)~Exploratory findings not pre-registered. (7)~Multiple comparisons: 7/8 tests survived BH-FDR, but does not account for broader analytic flexibility. (8)~Observational design. (9)~Single dataset. (10)~Sport bias (cycling 62\%).
+(1)~\textit{Speed-based DI}: our DI uses $\text{HR}/\text{Speed}$, not $\text{HR}/\text{Power}$. The route artifact (C1) is specific to speed-based DI; H1, H2, H4 may differ for power-based DI. (2)~Secondary data with uncontrolled sensor quality. (3)~Residual--noise conflation: route-matched ICC partially addresses this, but full separation requires research-grade sensors. (4)~No gold standard (VO$_2$max, power). (5)~Demographics: 94.6\% male; age and training history unknown. (6)~Exploratory findings not pre-registered. (7)~Multiple comparisons: 7/8 tests survived BH-FDR, but does not account for broader analytic flexibility. (8)~Observational design. (9)~Single dataset. (10)~Sport bias (cycling 61.8\%).
 
 % ============================================================
 \section*{Conclusion}
 
-Under speed-based DI, the data support a two-dimensional durability structure rather than the proposed four dimensions (CRQ1). PCA on standardized person-level medians confirmed this: the first eigenvalue ($1.61$) explained 53.6\% of variance, while the second ($1.01$) fell below the 95th-percentile parallel analysis threshold ($1.006$), justifying a single-factor retention. Gradient correction (GACD) successfully isolates true cardiac drift from route geometry, with VIFs remaining low (median: gradient 2.01, speed 2.09, time 1.07), ensuring coefficient stability. We propose gradient sensitivity and speed sensitivity---the GACD regression coefficients---as route-corrected durability profiling metrics. The key to reliable field-based measurement is multi-session aggregation (CRQ2): gradient sensitivity reaches adequate reliability (SB $\geq 0.80$) at $\geq 5$ sessions, providing a concrete protocol for practitioners. The Person signal (22--44\%) is recoverable through aggregation; the Occasion component (residual variance) remains substantial (56--84\% in single sessions) but reflects day-to-day physiological variation that may carry information about readiness and recovery. Route-matched ICC analysis showed that 18--31 percentage points of this apparent Occasion variance is actually route-related, further validating the necessity of GACD. Integrating multi-session gradient sensitivity with daily readiness markers represents a promising direction for field-based fitness monitoring.
+Under speed-based DI, the data support a two-dimensional durability structure rather than the proposed four dimensions (CRQ1). PCA on standardized person-level medians confirmed this: the first eigenvalue ($1.61$) explained 53.6\% of variance, while the second ($1.01$) fell below the 95th-percentile parallel analysis threshold ($1.034$), justifying a single-factor retention. Gradient correction (GACD) successfully isolates true cardiac drift from route geometry, with VIFs remaining low (median: gradient 2.01, speed 2.09, time 1.07), ensuring coefficient stability. We propose gradient sensitivity and speed sensitivity---the GACD regression coefficients---as route-corrected durability profiling metrics. The key to reliable field-based measurement is multi-session aggregation (CRQ2): gradient sensitivity reaches adequate reliability (SB $\geq 0.80$) at $\geq 5$ sessions, providing a concrete protocol for practitioners. The Person signal (22--44\%) is recoverable through aggregation; the Occasion component (residual variance) remains substantial (56--84\% in single sessions) but reflects day-to-day physiological variation that may carry information about readiness and recovery. Route-matched ICC analysis showed that 18--31 percentage points of this apparent Occasion variance is actually route-related, further validating the necessity of GACD. Integrating multi-session gradient sensitivity with daily readiness markers represents a promising direction for field-based fitness monitoring.
 
 % ============================================================
 \section*{Ethics Statement}
@@ -421,13 +416,16 @@ The authors declare that they have no competing interests.
 No external funding was received for this study.
 
 \section*{Author Contributions}
-All authors contributed equally to the conceptualisation, data analysis, and manuscript preparation.
+H.I.\ conceived the study, developed the methodology, performed all analyses, and wrote the manuscript.
 
 \section*{Acknowledgements}
 We thank the developers and contributors of the FitRec dataset and the Endomondo community for making the telemetry data available for research.
 
 \section*{Abbreviations}
 \textbf{DI}: Drift Index ($\text{HR}/\text{Speed}$); \textbf{FI}: Flatness Index (gradient sensitivity); \textbf{RI}: Roughness Index (altitude sensitivity); \textbf{GACD}: Gradient-Adjusted Cardiac Drift; \textbf{SB}: Spearman--Brown; \textbf{ICC}: Intraclass Correlation Coefficient; \textbf{VIF}: Variance Inflation Factor.
+
+\section*{Data Availability}
+All analysis code and reproducibility scripts are available at \url{https://github.com/ikari12/GRAD}. The FitRec dataset is described in Ni et al.\ (2019) \cite{ni2019}.
 
 \bibliography{references}
 
