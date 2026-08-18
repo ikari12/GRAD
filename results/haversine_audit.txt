@@ -1,0 +1,11 @@
+  matched 2000/13395
+  matched 4000/13395
+  matched 6000/13395
+  matched 8000/13395
+  matched 10000/13395
+  matched 12000/13395
+[KEY] n_included = 13395
+[KEY] n_matched = 13395
+[KEY] n_recorded_speed = 2297
+[KEY] n_haversine_speed = 11098
+[KEY] pct_haversine = 82.85

@@ -1,3 +1,14 @@
+Sampled 300 workout IDs from 2297 total
+Streaming /Users/hisashi/Developer/GRAD/data/endomondoHR.json (~6.5 GB)...
+  Processed 50/300 workouts (15s)
+  Processed 100/300 workouts (24s)
+  Processed 150/300 workouts (37s)
+  Processed 200/300 workouts (45s)
+  Processed 250/300 workouts (61s)
+  Processed 300/300 workouts (81s)
+
+Done: 300 workouts processed in 81.2s
+
 ======================================================================
 SENSITIVITY ANALYSIS: Temporal Autocorrelation in GACD Regressions
 ======================================================================
@@ -96,3 +107,9 @@ Median n_points per workout: 499 (IQR 499–499)
 [KEY] GLS_R_SPEED = 0.757
 [KEY] GLS_MED_ABS_DIFF_SPEED = 1.0987
 [KEY] GLS_MED_REL_PCT_SPEED = 80.8
+
+Summary saved: /Users/hisashi/Developer/GRAD/results/sensitivity_autocorrelation.txt
+Figure saved: /Users/hisashi/Developer/GRAD/paper/Figures/figS_dw.png
+Figure saved: /Users/hisashi/Developer/GRAD/paper/Figures/figS_acf.png
+
+✓ Sensitivity analysis complete.

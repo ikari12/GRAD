@@ -1,0 +1,105 @@
+
+============================================================
+(d) Data provenance audit
+============================================================
+  CSV rows                     = 13395
+  CSV unique users             = 674
+  Users with >= 5 workouts     = 388
+  PCA sample (DI+FI+RI valid)  = 378
+  PCA sample (DI+FI valid)     = 387
+[KEY] audit_n_workouts = 13395
+[KEY] audit_n_users = 674
+[KEY] audit_n_pca_users = 378
+[KEY] audit_n_pca_users_difi = 387
+  Haversine-imputed speed      = 0 (0.00%)
+[KEY] audit_n_haversine_imputed = 0
+[KEY] audit_pct_haversine_imputed = 0.00
+
+============================================================
+(a) Parallel analysis with bootstrap inference (DI, FI, RI)
+============================================================
+  N users = 378
+  PC1: eigenvalue = 1.6123   parallel 95% = 1.1516   margin = +0.4607
+[KEY] pca_eig_1 = 1.6123
+[KEY] pca_thr_1 = 1.1516
+[KEY] pca_margin_1 = 0.4607
+  PC2: eigenvalue = 1.0038   parallel 95% = 1.0357   margin = -0.0320
+[KEY] pca_eig_2 = 1.0038
+[KEY] pca_thr_2 = 1.0357
+[KEY] pca_margin_2 = -0.0320
+  PC3: eigenvalue = 0.3919   parallel 95% = 0.9720   margin = -0.5802
+[KEY] pca_eig_3 = 0.3919
+[KEY] pca_thr_3 = 0.9720
+[KEY] pca_margin_3 = -0.5802
+[KEY] pca_n_factors_point = 1
+
+  PC1: eigenvalue 95% CI [1.4985, 1.7271]   margin 95% CI [+0.3469, +0.5755]
+[KEY] pca_eig_1_ci_lo = 1.4985
+[KEY] pca_eig_1_ci_hi = 1.7271
+[KEY] pca_margin_1_ci_lo = 0.3469
+[KEY] pca_margin_1_ci_hi = 0.5755
+  PC2: eigenvalue 95% CI [0.9325, 1.0469]   margin 95% CI [-0.1032, +0.0112]
+[KEY] pca_eig_2_ci_lo = 0.9325
+[KEY] pca_eig_2_ci_hi = 1.0469
+[KEY] pca_margin_2_ci_lo = -0.1032
+[KEY] pca_margin_2_ci_hi = 0.0112
+  PC3: eigenvalue 95% CI [0.2965, 0.4857]   margin 95% CI [-0.6755, -0.4863]
+[KEY] pca_eig_3_ci_lo = 0.2965
+[KEY] pca_eig_3_ci_hi = 0.4857
+[KEY] pca_margin_3_ci_lo = -0.6755
+[KEY] pca_margin_3_ci_hi = -0.4863
+
+  Bootstrap replicates retaining PC2 = 5.3%
+  Modal number of factors retained   = 1
+[KEY] pca_pc2_retained_pct = 5.3
+[KEY] pca_nfactors_1_pct = 94.7
+[KEY] pca_nfactors_2_pct = 5.3
+
+============================================================
+(b) PCA on DI and FI only (RI excluded: ICC = 0.10)
+============================================================
+  N users = 387
+  PC1: eigenvalue = 1.6033   parallel 95% = 1.1070   margin = +0.4963
+[KEY] pca_difi_eig_1 = 1.6033
+[KEY] pca_difi_thr_1 = 1.1070
+  PC2: eigenvalue = 0.4019   parallel 95% = 0.9990   margin = -0.5971
+[KEY] pca_difi_eig_2 = 0.4019
+[KEY] pca_difi_thr_2 = 0.9990
+[KEY] pca_difi_n_factors = 1
+[KEY] pca_difi_var_explained_1 = 0.7996
+[KEY] pca_difi_r = -0.5991
+[KEY] pca_difi_shared_var_pct = 35.9
+
+============================================================
+(c) Descent placement: subgroup sizes and moderation test
+============================================================
+  gentle   : r = +0.0845   p = 1.562e-03   n = 1399
+[KEY] desc_gentle_r = 0.0845
+[KEY] desc_gentle_p = 1.562e-03
+[KEY] desc_gentle_n = 1399
+  moderate : r = +0.2337   p = 1.407e-10   n = 735
+[KEY] desc_moderate_r = 0.2337
+[KEY] desc_moderate_p = 1.407e-10
+[KEY] desc_moderate_n = 735
+  steep    : r = +0.2158   p = 5.671e-03   n = 163
+[KEY] desc_steep_r = 0.2158
+[KEY] desc_steep_p = 5.671e-03
+[KEY] desc_steep_n = 163
+
+  Fisher z test (gentle vs moderate): z = 3.3626, p = 0.0008
+[KEY] desc_moderation_z = 3.3626
+[KEY] desc_moderation_p = 0.0008
+
+  bike          : r = +0.1344   p = 3.190e-09   n = 1927
+[KEY] desc_sport_bike_r = 0.1344
+[KEY] desc_sport_bike_n = 1927
+  run           : r = +0.1876   p = 3.770e-02   n = 123
+[KEY] desc_sport_run_r = 0.1876
+[KEY] desc_sport_run_n = 123
+  mountain bike : r = +0.0079   p = 9.068e-01   n = 223
+[KEY] desc_sport_mountain_bike_r = 0.0079
+[KEY] desc_sport_mountain_bike_n = 223
+
+============================================================
+Revision analyses complete.
+============================================================

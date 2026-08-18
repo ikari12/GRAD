@@ -144,6 +144,14 @@ dw_values = []
 acf_matrix = []  # each row = ACF for one workout
 se_ratios = {"gradient": [], "time": [], "speed": []}  # NW/OLS ratio
 beta_ols_all = {"gradient": [], "time": [], "speed": []}
+# Paired coefficient/SE triples, retained so that OLS and HAC confidence
+# intervals can be compared on exactly the same set of workouts.
+se_ols_all = {"gradient": [], "time": [], "speed": []}
+se_nw_all = {"gradient": [], "time": [], "speed": []}
+beta_paired = {"gradient": [], "time": [], "speed": []}
+beta_gls_all = {"gradient": [], "time": [], "speed": []}
+beta_ols_for_gls = {"gradient": [], "time": [], "speed": []}
+gls_rho_all = []
 n_points_all = []
 r2_ols_all = []
 
@@ -261,9 +269,26 @@ with open(JSON_PATH, "r") as f:
             for idx, name in [(1, "gradient"), (2, "time"), (3, "speed")]:
                 if se_ols[idx] > 0:
                     se_ratios[name].append(se_nw[idx] / se_ols[idx])
+                    se_ols_all[name].append(se_ols[idx])
+                    se_nw_all[name].append(se_nw[idx])
+                    beta_paired[name].append(beta[idx])
             beta_ols_all["gradient"].append(beta[1])
             beta_ols_all["time"].append(beta[2])
             beta_ols_all["speed"].append(beta[3])
+            # Cochrane–Orcutt GLS under AR(1): transform y_t − ρ y_{t−1}
+            # and compare point estimates to OLS on the same workout.
+            rho = float(np.corrcoef(residuals[1:], residuals[:-1])[0, 1])
+            if np.isfinite(rho) and abs(rho) < 0.999:
+                y_star = y[1:] - rho * y[:-1]
+                X_star = X[1:] - rho * X[:-1]
+                beta_gls, _, _, _ = np.linalg.lstsq(X_star, y_star, rcond=None)
+                beta_gls_all["gradient"].append(beta_gls[1])
+                beta_gls_all["time"].append(beta_gls[2])
+                beta_gls_all["speed"].append(beta_gls[3])
+                beta_ols_for_gls["gradient"].append(beta[1])
+                beta_ols_for_gls["time"].append(beta[2])
+                beta_ols_for_gls["speed"].append(beta[3])
+                gls_rho_all.append(rho)
         except Exception:
             pass
         
@@ -322,6 +347,33 @@ for name in ["gradient", "time", "speed"]:
                          f"mean = {np.mean(ratios):.2f}, "
                          f"IQR [{np.percentile(ratios, 25):.2f}, {np.percentile(ratios, 75):.2f}]")
 summary_lines.append("")
+printkey_lines = []
+summary_lines.append("--- HAC-Corrected Inference (per-workout 95% CIs) ---")
+summary_lines.append("  Median half-width of the 95% CI across workouts, and the share of")
+summary_lines.append("  workouts whose coefficient remains significant at alpha = .05.")
+for name in ["gradient", "time", "speed"]:
+    b = np.array(beta_paired[name])
+    s_ols = np.array(se_ols_all[name])
+    s_nw = np.array(se_nw_all[name])
+    hw_ols = 1.96 * s_ols
+    hw_nw = 1.96 * s_nw
+    sig_ols = 100.0 * np.mean(np.abs(b) > hw_ols)
+    sig_nw = 100.0 * np.mean(np.abs(b) > hw_nw)
+    summary_lines.append(
+        f"  β_{name:10s}: median 95% CI half-width  OLS {np.median(hw_ols):.4f}"
+        f"  ->  HAC {np.median(hw_nw):.4f}")
+    summary_lines.append(
+        f"  {'':12s}  significant at .05        OLS {sig_ols:.1f}%"
+        f"  ->  HAC {sig_nw:.1f}%")
+    summary_lines.append(
+        f"  {'':12s}  median coefficient        {np.median(b):+.4f}"
+        f"   [HAC 95% CI {np.median(b) - np.median(hw_nw):+.4f}, "
+        f"{np.median(b) + np.median(hw_nw):+.4f}]")
+    printkey_lines.append(f"[KEY] HAC_HW_OLS_{name.upper()} = {np.median(hw_ols):.4f}")
+    printkey_lines.append(f"[KEY] HAC_HW_NW_{name.upper()} = {np.median(hw_nw):.4f}")
+    printkey_lines.append(f"[KEY] HAC_SIG_OLS_{name.upper()} = {sig_ols:.1f}")
+    printkey_lines.append(f"[KEY] HAC_SIG_NW_{name.upper()} = {sig_nw:.1f}")
+summary_lines.append("")
 summary_lines.append("--- Coefficient Point Estimates (confirm unbiased under autocorrelation) ---")
 for name in ["gradient", "time", "speed"]:
     vals = np.array(beta_ols_all[name])
@@ -332,6 +384,28 @@ summary_lines.append("--- OLS R² ---")
 r2_arr = np.array(r2_ols_all)
 summary_lines.append(f"  Median: {np.median(r2_arr):.3f}")
 summary_lines.append(f"  IQR:    [{np.percentile(r2_arr, 25):.3f}, {np.percentile(r2_arr, 75):.3f}]")
+summary_lines.append("")
+summary_lines.append("--- Cochrane-Orcutt GLS vs OLS (AR(1) subsample) ---")
+summary_lines.append(f"  Workouts with GLS fit: {len(gls_rho_all)}")
+if gls_rho_all:
+    summary_lines.append(f"  Median AR(1) rho used in GLS: {np.median(gls_rho_all):.3f}")
+    printkey_lines.append(f"[KEY] GLS_N = {len(gls_rho_all)}")
+    printkey_lines.append(f"[KEY] GLS_RHO_MEDIAN = {np.median(gls_rho_all):.3f}")
+    for name in ["gradient", "time", "speed"]:
+        ols_b = np.array(beta_ols_for_gls[name])
+        gls_b = np.array(beta_gls_all[name])
+        r = np.corrcoef(ols_b, gls_b)[0, 1]
+        med_abs_diff = np.median(np.abs(gls_b - ols_b))
+        med_rel = np.median(np.abs(gls_b - ols_b) / np.maximum(np.abs(ols_b), 1e-8))
+        summary_lines.append(
+            f"  β_{name:10s}: r(OLS,GLS) = {r:.3f}   "
+            f"median |GLS-OLS| = {med_abs_diff:.4f}   "
+            f"median relative |diff| = {100*med_rel:.1f}%")
+        summary_lines.append(
+            f"  {'':12s}  median OLS {np.median(ols_b):+.4f}   median GLS {np.median(gls_b):+.4f}")
+        printkey_lines.append(f"[KEY] GLS_R_{name.upper()} = {r:.3f}")
+        printkey_lines.append(f"[KEY] GLS_MED_ABS_DIFF_{name.upper()} = {med_abs_diff:.4f}")
+        printkey_lines.append(f"[KEY] GLS_MED_REL_PCT_{name.upper()} = {100*med_rel:.1f}")
 summary_lines.append("")
 
 # Effective R² accounting for autocorrelation
@@ -349,6 +423,7 @@ summary_lines.append("[KEY] SE_RATIO_SPEED = " + f"{np.median(np.array(se_ratios
 summary_lines.append("[KEY] NEFF_RATIO = " + f"{np.median(eff_ratio):.3f}")
 summary_lines.append("[KEY] PCT_DW_BELOW_1_5 = " + f"{100*np.mean(dw_arr < 1.5):.1f}")
 summary_lines.append("[KEY] N_WORKOUTS = " + f"{len(dw_values)}")
+summary_lines.extend(printkey_lines)
 
 summary_text = "\n".join(summary_lines)
 print("\n" + summary_text)

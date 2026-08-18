@@ -143,6 +143,11 @@ abc_gacd = to_float_array(abc["gacd_rate"])
 abc_gradsens = to_float_array(abc["gacd_gradient_coef"])
 abc_speedsens = to_float_array(abc["gacd_speed_coef"])
 abc_uids = abc["userId"]
+
+# DI on the same workouts and the same code path as the GACD-derived metrics,
+# so that route-matched ICC and Spearman-Brown are directly comparable.
+_di_by_id = dict(zip(meixner["id"], to_float_array(meixner["DI"])))
+abc_di = np.array([_di_by_id.get(i, np.nan) for i in abc["id"]])
 abc_alt = to_float_array(abc["alt_range"])
 abc_asc = to_float_array(abc["total_ascent"])
 abc_dur = to_float_array(abc["dur_min"])
@@ -170,7 +175,7 @@ def compute_icc_oneway(user_groups):
     return max(0, icc)
 
 # Overall ICC
-for metric_name, metric_vals in [("gacd", abc_gacd), ("gradsens", abc_gradsens), ("speedsens", abc_speedsens)]:
+for metric_name, metric_vals in [("di", abc_di), ("gacd", abc_gacd), ("gradsens", abc_gradsens), ("speedsens", abc_speedsens)]:
     # Overall ICC
     user_groups_all = {}
     for i, uid in enumerate(abc_uids):
@@ -232,7 +237,7 @@ for metric_name, metric_vals in [("gacd", abc_gacd), ("gradsens", abc_gradsens),
 # True Occasion ≈ 1 - X (what remains after controlling person AND route)
 # Measurement error is part of True Occasion but we can't separate further
 print("\n  --- Revised Variance Decomposition ---")
-for metric_name, metric_vals in [("gacd", abc_gacd), ("gradsens", abc_gradsens), ("speedsens", abc_speedsens)]:
+for metric_name, metric_vals in [("di", abc_di), ("gacd", abc_gacd), ("gradsens", abc_gradsens), ("speedsens", abc_speedsens)]:
     user_groups_all = {}
     for i, uid in enumerate(abc_uids):
         if np.isfinite(metric_vals[i]):
@@ -352,7 +357,7 @@ print("\n" + "=" * 60)
 print("S4. Spearman-Brown Convergence Curve (k=2..10)")
 print("=" * 60)
 
-for metric_name, metric_vals in [("gacd", abc_gacd), ("gradsens", abc_gradsens), ("speedsens", abc_speedsens)]:
+for metric_name, metric_vals in [("di", abc_di), ("gacd", abc_gacd), ("gradsens", abc_gradsens), ("speedsens", abc_speedsens)]:
     # Collect per-user vectors
     user_vals = {}
     for i, uid in enumerate(abc_uids):

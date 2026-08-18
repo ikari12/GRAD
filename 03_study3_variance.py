@@ -43,6 +43,18 @@ if not os.path.exists(abc_path):
 df_abc = pd.read_csv(abc_path)
 print(f"Loaded abc_metrics.csv: {len(df_abc)} rows")
 
+# DI is defined in meixner_4d_indices.csv but must be evaluated on the same
+# code path as the GACD-derived metrics so that the reliability table compares
+# like with like. Merge it in on workout id rather than recomputing it.
+idx_path = os.path.join(DATA_DIR, "meixner_4d_indices.csv")
+if os.path.exists(idx_path):
+    df_idx = pd.read_csv(idx_path, usecols=["id", "DI"])
+    df_abc = df_abc.merge(df_idx, on="id", how="left")
+    print(f"  merged DI for {df_abc.DI.notna().sum()} of {len(df_abc)} workouts")
+else:
+    print(f"WARNING: {idx_path} not found; DI row will be skipped", file=sys.stderr)
+    df_abc["DI"] = np.nan
+
 # ルート特徴量
 ROUTE_FEATURES = [
     "total_ascent", "total_descent", "alt_range", "max_alt", "min_alt",
@@ -52,6 +64,7 @@ ROUTE_FEATURES = [
 
 # 分析対象の指標定義（名前，カラム名，短縮名，データソース）
 METRICS = [
+    ("DI",                  "DI",                  "di",       "abc"),
     ("gacd_rate",           "gacd_rate",           "gacd",     "abc"),
     ("gacd_gradient_coef",  "gacd_gradient_coef",  "gradsens", "abc"),
     ("gacd_speed_coef",     "gacd_speed_coef",     "speedsens","abc"),

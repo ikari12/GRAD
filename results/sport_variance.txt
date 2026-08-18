@@ -14,34 +14,34 @@ Sport breakdown (high-engagement):
   Total: 1669 workouts, 102 users (94 with ≥5 sessions)
   GACD (cardiac drift):
     ICC(1,1) = 0.215  (K=94, N=1647)
-    SB(k=5)  = 0.703  (n_users=54)
+    SB(k=5)  = 0.720  (n_users=54)
     %Person  = 21.5%
     %Route   = 0.0%
     %Occasion= 78.5%
     [KEY] icc_gacd_bike = 0.215
-    [KEY] sb_gacd_bike = 0.703
+    [KEY] sb_gacd_bike = 0.720
     [KEY] pct_person_gacd_bike = 21.5
     [KEY] pct_route_gacd_bike = 0.0
     [KEY] pct_occasion_gacd_bike = 78.5
   Gradient sensitivity:
     ICC(1,1) = 0.377  (K=94, N=1647)
-    SB(k=5)  = 0.907  (n_users=54)
+    SB(k=5)  = 0.934  (n_users=54)
     %Person  = 37.7%
     %Route   = 0.0%
     %Occasion= 62.3%
     [KEY] icc_gradsens_bike = 0.377
-    [KEY] sb_gradsens_bike = 0.907
+    [KEY] sb_gradsens_bike = 0.934
     [KEY] pct_person_gradsens_bike = 37.7
     [KEY] pct_route_gradsens_bike = 0.0
     [KEY] pct_occasion_gradsens_bike = 62.3
   Speed sensitivity:
     ICC(1,1) = 0.470  (K=94, N=1647)
-    SB(k=5)  = 0.874  (n_users=54)
+    SB(k=5)  = 0.901  (n_users=54)
     %Person  = 47.0%
     %Route   = 3.1%
     %Occasion= 49.8%
     [KEY] icc_speedsens_bike = 0.470
-    [KEY] sb_speedsens_bike = 0.874
+    [KEY] sb_speedsens_bike = 0.901
     [KEY] pct_person_speedsens_bike = 47.0
     [KEY] pct_route_speedsens_bike = 3.1
     [KEY] pct_occasion_speedsens_bike = 49.8
@@ -55,34 +55,34 @@ Sport breakdown (high-engagement):
   Total: 193 workouts, 21 users (10 with ≥5 sessions)
   GACD (cardiac drift):
     ICC(1,1) = 0.076  (K=10, N=172)
-    SB(k=5)  = -0.003  (n_users=6)
+    SB(k=5)  = 0.789  (n_users=6)
     %Person  = 7.6%
     %Route   = 0.0%
     %Occasion= 92.4%
     [KEY] icc_gacd_mountain bike = 0.076
-    [KEY] sb_gacd_mountain bike = -0.003
+    [KEY] sb_gacd_mountain bike = 0.789
     [KEY] pct_person_gacd_mountain bike = 7.6
     [KEY] pct_route_gacd_mountain bike = 0.0
     [KEY] pct_occasion_gacd_mountain bike = 92.4
   Gradient sensitivity:
     ICC(1,1) = 0.017  (K=10, N=172)
-    SB(k=5)  = 0.253  (n_users=6)
+    SB(k=5)  = 0.792  (n_users=6)
     %Person  = 1.7%
     %Route   = 0.0%
     %Occasion= 98.3%
     [KEY] icc_gradsens_mountain bike = 0.017
-    [KEY] sb_gradsens_mountain bike = 0.253
+    [KEY] sb_gradsens_mountain bike = 0.792
     [KEY] pct_person_gradsens_mountain bike = 1.7
     [KEY] pct_route_gradsens_mountain bike = 0.0
     [KEY] pct_occasion_gradsens_mountain bike = 98.3
   Speed sensitivity:
     ICC(1,1) = 0.215  (K=10, N=172)
-    SB(k=5)  = 0.426  (n_users=6)
+    SB(k=5)  = 0.856  (n_users=6)
     %Person  = 21.5%
     %Route   = 0.0%
     %Occasion= 78.5%
     [KEY] icc_speedsens_mountain bike = 0.215
-    [KEY] sb_speedsens_mountain bike = 0.426
+    [KEY] sb_speedsens_mountain bike = 0.856
     [KEY] pct_person_speedsens_mountain bike = 21.5
     [KEY] pct_route_speedsens_mountain bike = 0.0
     [KEY] pct_occasion_speedsens_mountain bike = 78.5
@@ -117,3 +117,7 @@ High-engagement subset (N = 1925):
   [KEY] route_symmetric_he_pct = 48.4
   back-climb     :   203 ( 10.5%)
   [KEY] route_back-climb_he_pct = 10.5
+
+Summary saved: /Users/hisashi/Developer/GRAD/results/sport_variance.txt
+
+✓ Sport-specific analysis complete.

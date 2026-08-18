@@ -1,89 +1,116 @@
-Loaded abc_metrics.csv: 2343 rows
+Loaded abc_metrics.csv: 2297 rows
+  merged DI for 2297 of 2297 workouts
 
 ============================================================
 (a) ICC (one-way random, users >= 5 workouts)
 ============================================================
-[KEY] icc_gacd = 0.219
-[KEY] icc_gradsens = 0.358
-[KEY] icc_speedsens = 0.431
+[KEY] icc_di_all = 0.199
+[KEY] icc_di_hilly = 0.252
+[KEY] icc_gacd_all = 0.224
+[KEY] icc_gacd_hilly = 0.254
+[KEY] icc_gradsens_all = 0.379
+[KEY] icc_gradsens_hilly = 0.450
+[KEY] icc_speedsens_all = 0.447
+[KEY] icc_speedsens_hilly = 0.580
 
 ============================================================
 (b) Split-half reliability (users >= 10 workouts)
 ============================================================
-[KEY] sh_gacd = 0.739
-[KEY] sb_gacd = 0.850
+[KEY] sh_di = 0.602
+[KEY] sb_di = 0.752
+[KEY] sh_gacd = 0.727
+[KEY] sb_gacd = 0.842
 [KEY] sh_gradsens = 0.820
 [KEY] sb_gradsens = 0.901
-[KEY] sh_speedsens = 0.866
-[KEY] sb_speedsens = 0.928
+[KEY] sh_speedsens = 0.861
+[KEY] sb_speedsens = 0.925
 
 ============================================================
 (c) Variance decomposition with Bootstrap CI (500 iter)
 ============================================================
-[KEY] pct_person_gacd = 21.9
-[KEY] pct_person_gacd_ci_lo = 11.7
-[KEY] pct_person_gacd_ci_hi = 33.0
+[KEY] pct_person_di = 19.9
+[KEY] pct_person_di_ci_lo = 10.6
+[KEY] pct_person_di_ci_hi = 30.2
+[KEY] pct_route_di = 0.0
+[KEY] pct_route_di_ci_lo = 0.0
+[KEY] pct_route_di_ci_hi = 41.5
+[KEY] pct_occasion_di = 80.1
+[KEY] pct_occasion_di_ci_lo = 43.7
+[KEY] pct_occasion_di_ci_hi = 85.5
+[KEY] pct_person_gacd = 22.4
+[KEY] pct_person_gacd_ci_lo = 11.1
+[KEY] pct_person_gacd_ci_hi = 32.0
 [KEY] pct_route_gacd = 0.0
 [KEY] pct_route_gacd_ci_lo = 0.0
-[KEY] pct_route_gacd_ci_hi = 3.7
-[KEY] pct_occasion_gacd = 78.1
-[KEY] pct_occasion_gacd_ci_lo = 66.3
-[KEY] pct_occasion_gacd_ci_hi = 87.1
-[KEY] pct_person_gradsens = 35.8
-[KEY] pct_person_gradsens_ci_lo = 25.7
-[KEY] pct_person_gradsens_ci_hi = 44.4
-[KEY] pct_route_gradsens = 5.7
+[KEY] pct_route_gacd_ci_hi = 4.3
+[KEY] pct_occasion_gacd = 77.6
+[KEY] pct_occasion_gacd_ci_lo = 66.0
+[KEY] pct_occasion_gacd_ci_hi = 87.6
+[KEY] pct_person_gradsens = 37.9
+[KEY] pct_person_gradsens_ci_lo = 29.4
+[KEY] pct_person_gradsens_ci_hi = 47.1
+[KEY] pct_route_gradsens = 0.0
 [KEY] pct_route_gradsens_ci_lo = 0.0
-[KEY] pct_route_gradsens_ci_hi = 11.3
-[KEY] pct_occasion_gradsens = 58.5
-[KEY] pct_occasion_gradsens_ci_lo = 50.8
-[KEY] pct_occasion_gradsens_ci_hi = 68.9
-[KEY] pct_person_speedsens = 43.1
-[KEY] pct_person_speedsens_ci_lo = 24.6
-[KEY] pct_person_speedsens_ci_hi = 57.4
-[KEY] pct_route_speedsens = 0.0
+[KEY] pct_route_gradsens_ci_hi = 9.4
+[KEY] pct_occasion_gradsens = 62.1
+[KEY] pct_occasion_gradsens_ci_lo = 48.3
+[KEY] pct_occasion_gradsens_ci_hi = 66.0
+[KEY] pct_person_speedsens = 44.7
+[KEY] pct_person_speedsens_ci_lo = 25.7
+[KEY] pct_person_speedsens_ci_hi = 57.5
+[KEY] pct_route_speedsens = 0.4
 [KEY] pct_route_speedsens_ci_lo = 0.0
-[KEY] pct_route_speedsens_ci_hi = 7.4
-[KEY] pct_occasion_speedsens = 56.9
-[KEY] pct_occasion_speedsens_ci_lo = 41.5
+[KEY] pct_route_speedsens_ci_hi = 8.1
+[KEY] pct_occasion_speedsens = 54.8
+[KEY] pct_occasion_speedsens_ci_lo = 40.5
 [KEY] pct_occasion_speedsens_ci_hi = 72.6
 
 ============================================================
 (d) Route R² cross-validation (5-fold CV Ridge)
 ============================================================
-[KEY] route_r2_cv_gacd = -0.030
-[KEY] route_r2_cv_gradsens = 0.089
-[KEY] route_r2_cv_speedsens = -0.092
+[KEY] route_r2_in_di = 0.358
+[KEY] route_r2_cv_di = -0.449
+[KEY] route_r2_in_gacd = 0.040
+[KEY] route_r2_cv_gacd = -0.047
+[KEY] route_r2_in_gradsens = 0.119
+[KEY] route_r2_cv_gradsens = 0.000
+[KEY] route_r2_in_speedsens = 0.079
+[KEY] route_r2_cv_speedsens = 0.008
 
 ============================================================
 (e) Convergent validity: person-level median vs avg_speed
 ============================================================
-[KEY] speed_corr_gacd = -0.050
-[KEY] speed_corr_gradsens = 0.327
-[KEY] speed_corr_speedsens = -0.134
+[KEY] speed_corr_di_all = -0.071
+[KEY] speed_corr_di_hilly = -0.075
+[KEY] speed_corr_gacd_all = -0.065
+[KEY] speed_corr_gacd_hilly = 0.102
+[KEY] speed_corr_gradsens_all = 0.375
+[KEY] speed_corr_gradsens_hilly = 0.397
+[KEY] speed_corr_speedsens_all = -0.156
+[KEY] speed_corr_speedsens_hilly = -0.094
 
 ============================================================
 (f) Temporal stability (users >= 10, early 1/3 vs late 1/3)
 ============================================================
-[KEY] temporal_r_gradsens = 0.767
+[KEY] temporal_r_gradsens = 0.802
 
 ============================================================
 (g) Convergence analysis (gradient sensitivity)
 ============================================================
-[KEY] converge_2 = 0.516
-[KEY] converge_3 = 0.753
-[KEY] converge_5 = 0.796
-[KEY] converge_7 = 0.843
-[KEY] converge_10 = 0.881
+[KEY] converge_2 = 0.609
+[KEY] converge_3 = 0.628
+[KEY] converge_5 = 0.838
+[KEY] converge_7 = 0.849
+[KEY] converge_10 = 0.924
 
 ============================================================
 (h) ICC sensitivity (gradient sensitivity, varying thresholds)
 ============================================================
-[KEY] icc_thresh_3 = 0.355
-[KEY] icc_thresh_5 = 0.358
-[KEY] icc_thresh_8 = 0.353
-[KEY] icc_thresh_10 = 0.358
-[KEY] icc_thresh_15 = 0.370
+[KEY] icc_thresh_3 = 0.373
+[KEY] icc_thresh_5 = 0.379
+[KEY] icc_thresh_8 = 0.375
+[KEY] icc_thresh_10 = 0.382
+[KEY] icc_thresh_15 = 0.395
 
 ============================================================
 Study 3 complete.
