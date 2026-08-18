@@ -9,6 +9,8 @@ import os, json, csv, sys, ast
 import numpy as np
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
+from lab_gcs import open_text as lab_open_text  # noqa: E402
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 JSON_PATH = os.path.join(DATA_DIR, "endomondoHR.json")
 IDX_CSV = os.path.join(DATA_DIR, "meixner_4d_indices.csv")
@@ -101,7 +103,7 @@ def compute_vif_for_workout(rec):
 # Stream through JSON and compute VIF for each target workout
 vif_results = []
 count = 0
-with open(JSON_PATH) as f:
+with lab_open_text(JSON_PATH) as f:
     for line in f:
         rec = ast.literal_eval(line)
         wid = str(rec.get('id', ''))

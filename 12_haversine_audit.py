@@ -3,8 +3,11 @@
 import csv
 import json
 import os
+import sys
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, ROOT)
+from lab_gcs import open_text as lab_open_text  # noqa: E402
 CSV_PATH = os.path.join(ROOT, "data", "meixner_4d_indices.csv")
 JSON_PATH = os.path.join(ROOT, "data", "endomondoHR.json")
 
@@ -17,7 +20,7 @@ n_recorded = 0
 n_haversine = 0
 n_seen = 0
 
-with open(JSON_PATH) as f:
+with lab_open_text(JSON_PATH) as f:
     for line in f:
         if n_seen >= len(ids):
             break

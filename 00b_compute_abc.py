@@ -10,6 +10,8 @@ import numpy as np
 from collections import defaultdict
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
+from lab_gcs import open_text as lab_open_text  # noqa: E402
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 JSON_PATH = os.path.join(DATA_DIR, "endomondoHR.json")
 IDX_CSV = os.path.join(DATA_DIR, "meixner_4d_indices.csv")
@@ -312,7 +314,7 @@ if __name__ == '__main__':
     results = []
     total = 0; matched = 0
 
-    with open(JSON_PATH) as f:
+    with lab_open_text(JSON_PATH) as f:
         for line in f:
             line = line.strip()
             if not line or line in ('[', ']'): continue

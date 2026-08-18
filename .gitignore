@@ -1,5 +1,6 @@
 # Workstation lab bucket (not a service bucket): gs://grad-lab
-# Raw FitRec source (too large; download via run_all.sh Step 0)
+# Raw FitRec JSON is canonical at gs://yamap-gpx-lab/research/data/endomondoHR.json
+# (see lab_assets.json). Do not keep a local copy.
 data/raw/
 data/endomondoHR.json
 

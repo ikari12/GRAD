@@ -47,6 +47,9 @@ plt.rcParams.update({
 })
 
 ROOT = Path(__file__).resolve().parent
+import sys
+sys.path.insert(0, str(ROOT))
+from lab_gcs import open_text as lab_open_text  # noqa: E402
 DATA = ROOT / "data"
 FIG_DIR = ROOT / "paper" / "Figures"
 RES_DIR = ROOT / "results"
@@ -158,8 +161,8 @@ r2_ols_all = []
 found = 0
 t0 = time.time()
 
-print(f"Streaming {JSON_PATH} (~6.5 GB)...")
-with open(JSON_PATH, "r") as f:
+print(f"Streaming {JSON_PATH} (~6.5 GB from local or lab GCS)...")
+with lab_open_text(JSON_PATH) as f:
     for line_num, line in enumerate(f, 1):
         if found >= len(sampled_ids):
             break

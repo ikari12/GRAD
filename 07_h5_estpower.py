@@ -4,12 +4,14 @@ reduce route artifact compared to raw speed?
 
 Stable commit: 9ddc7c2
 """
-import os, json, math, time
+import os, json, math, time, sys
 import numpy as np
 from collections import Counter
 from scipy import stats
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
+from lab_gcs import open_text as lab_open_text  # noqa: E402
 DATA = os.path.join(SCRIPT_DIR, "data", "endomondoHR.json")
 OUT  = os.path.join(SCRIPT_DIR, "results", "h5_estimated_power.txt")
 
@@ -120,7 +122,7 @@ def main():
     skip = Counter()
     t0 = time.time()
 
-    with open(DATA, 'r') as f:
+    with lab_open_text(DATA) as f:
         for ln, line in enumerate(f):
             line = line.strip()
             if not line or line in ('[', ']'): continue

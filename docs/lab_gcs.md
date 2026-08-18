@@ -1,6 +1,6 @@
 # 作業用 private GCS（サービスと分離）
 
-最終更新: 2026-08-18
+最終更新: 2026-08-19
 
 このリポジトリは論文の再現パイプラインであり、Cloud Run・公開 CDN・ユーザー upload 用のバケットは**持たない**。  
 Git に載せない作業データ（FitRec 原データなど）の正本だけを、下記の lab バケットに置く。
@@ -31,7 +31,7 @@ lab バケット名をデプロイスクリプトや定数ファイルに書い�
 |---|---|---|
 | `data/`（CSV・期待値。`endomondoHR.json` を除く） | 2.8 MB | する |
 | `results/` | 64 KB | する |
-| `data/endomondoHR.json` | gitignore。シンボリックリンク。1GB 超の原データ | `--research` のときだけ |
+| `data/endomondoHR.json` | gitignore．正本は `gs://yamap-gpx-lab/research/data/endomondoHR.json`（`lab_assets.json`）．ローカルには残さない．スクリプトは GCS からストリームする |
 
 次は **同期しない**（秘密・認証・ゴミ）。
 
@@ -58,9 +58,11 @@ bash tools/scripts/sync_lab_gcs.sh status
 
 ```text
 gs://grad-lab/
-  data/     # CSV 等。endomondoHR.json は含めない
+  data/     # CSV 等．endomondoHR.json は含めない
   results/  # 解析ログ
-  raw/      # --research: endomondoHR.json
+
+FitRec 原データは共有正本:
+  gs://yamap-gpx-lab/research/data/endomondoHR.json
 ```
 
 ## 誰がどの認証でアクセスするか

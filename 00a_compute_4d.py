@@ -4,7 +4,7 @@ Changes from v1:
   - Use HR-only DI if speed completely unavailable
   - Independent array handling (no min-length alignment)
 """
-import os, json, time, csv, math
+import os, json, time, csv, math, sys
 from collections import defaultdict, Counter
 from datetime import datetime, timezone
 import numpy as np
@@ -12,6 +12,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, SCRIPT_DIR)
+from lab_gcs import open_text as lab_open_text  # noqa: E402
 DATA_DIR = os.path.join(SCRIPT_DIR, "data")
 DATA = os.path.join(DATA_DIR, "endomondoHR.json")
 OUT = os.path.join(DATA_DIR, "meixner_4d_indices.csv")
@@ -76,7 +78,7 @@ def main():
     skip_reasons = Counter()
     t0 = time.time()
 
-    with open(DATA, 'r') as f:
+    with lab_open_text(DATA) as f:
         for ln, line in enumerate(f):
             line = line.strip()
             if not line or line in ('[', ']'): continue

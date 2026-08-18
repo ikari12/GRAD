@@ -73,25 +73,9 @@ if [ $SKIP_DOWNLOAD -eq 1 ]; then
 elif [ -f "$RAW_JSON" ]; then
     echo "  ✓ endomondoHR.json already exists ($(du -h "$RAW_JSON" | cut -f1))"
 else
-    echo "  Downloading FitRec dataset from Kaggle..."
-    echo "  (requires: pip install kaggle && ~/.kaggle/kaggle.json)"
-    if ! command -v kaggle &>/dev/null; then
-        echo "  ERROR: kaggle CLI not found. Install: pip3 install kaggle"
-        echo "  Then place API key at ~/.kaggle/kaggle.json"
-        exit 1
-    fi
-    kaggle datasets download -d tientd95/fitrec-dataset -p "$DATA_DIR" --unzip
-    if [ ! -f "$RAW_JSON" ]; then
-        # zip内のパスが異なる場合
-        FOUND=$(find "$DATA_DIR" -name 'endomondoHR.json' -type f 2>/dev/null | head -1)
-        if [ -n "$FOUND" ] && [ "$FOUND" != "$RAW_JSON" ]; then
-            mv "$FOUND" "$RAW_JSON"
-        else
-            echo "  ERROR: endomondoHR.json not found after download"
-            exit 1
-        fi
-    fi
-    echo "  ✓ Download complete"
+    echo "  No local endomondoHR.json; scripts stream from lab GCS"
+    echo "  (gs://yamap-gpx-lab/research/data/endomondoHR.json via lab_assets.json)"
+    echo "  Optional local copy: gcloud storage cp gs://yamap-gpx-lab/research/data/endomondoHR.json $RAW_JSON"
 fi
 echo ""
 
