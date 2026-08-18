@@ -1,3 +1,4 @@
+# Workstation lab bucket (not a service bucket): gs://grad-lab
 # Raw FitRec source (too large; download via run_all.sh Step 0)
 data/raw/
 data/endomondoHR.json
