@@ -1,3 +1,4 @@
 {
+  ".cursor-wif-probe.txt": "gs://grad-lab/.cursor-wif-probe.txt",
   "data/endomondoHR.json": "gs://yamap-gpx-lab/research/data/endomondoHR.json"
 }

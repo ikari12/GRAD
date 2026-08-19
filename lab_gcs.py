@@ -4,19 +4,23 @@ Local files win when present. Otherwise ``lab_assets.json`` (repo root) maps
 repo-relative paths to ``gs://`` URIs. JSON/CSV should be streamed; weights
 may be downloaded to ``~/.cache/lab-gcs`` (outside the repo).
 
-On a Cursor Cloud Agent VM, GCS uses Workload Identity Federation: mint a
-short-lived OIDC JWT from ``CURSOR_AGENT_SOCKET``, exchange it at STS, and
-impersonate ``cursor-lab-reader`` (lab buckets only). Laptops keep using ADC.
+On a Cursor Cloud Agent / Cursor Web VM, GCS uses Workload Identity Federation:
+mint a short-lived OIDC JWT from ``CURSOR_AGENT_SOCKET``, exchange it at STS,
+and impersonate ``cursor-lab-reader`` (lab buckets only). Laptops keep using ADC.
 """
 from __future__ import annotations
 
+import base64
 import json
 import os
 import socket
+import subprocess
 import sys
+import time
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import IO, Any, Optional
+from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode, urlparse
 from urllib.request import Request, urlopen
 
@@ -67,18 +71,32 @@ def gcs_uri_for(path: str | Path, *, root: Path | None = None) -> Optional[str]:
         uri = sidecar.read_text(encoding="utf-8").strip().splitlines()[0].strip()
         if uri.startswith("gs://"):
             return uri
-    p = p.resolve()
-    root = (root or find_root(p)).resolve()
+    unresolved = Path(path)
+    try:
+        p = p.resolve()
+    except OSError:
+        p = unresolved
+    root = (root or find_root(p if p.exists() else Path.cwd())).resolve()
     mapping = _load_map(root)
     try:
         rel = p.relative_to(root).as_posix()
     except ValueError:
-        rel = Path(path).as_posix().lstrip("./")
+        rel = unresolved.as_posix().lstrip("./")
     if rel in mapping:
         return mapping[rel]
+    prefixes = sorted(
+        (k for k in mapping if rel == k or rel.startswith(k.rstrip("/") + "/")),
+        key=len,
+        reverse=True,
+    )
+    if prefixes:
+        key = prefixes[0]
+        base = mapping[key].rstrip("/")
+        rest = rel[len(key.rstrip("/")) :].lstrip("/")
+        return f"{base}/{rest}" if rest else base
     if p.name in mapping:
         return mapping[p.name]
-    return mapping.get(Path(path).as_posix().lstrip("./"))
+    return mapping.get(unresolved.as_posix().lstrip("./"))
 
 
 def exists(path: str | Path) -> bool:
@@ -95,13 +113,31 @@ def agent_socket_path() -> Path:
 def on_cloud_agent() -> bool:
     sock = agent_socket_path()
     try:
-        return sock.is_socket()
+        if sock.exists():
+            return True
     except OSError:
-        return False
+        pass
+    return bool(os.environ.get("CURSOR_AGENT_SOCKET"))
+
+
+def wait_for_agent_socket(timeout_s: float = 20.0) -> Path:
+    sock = agent_socket_path()
+    deadline = time.time() + timeout_s
+    while time.time() < deadline:
+        try:
+            if sock.exists():
+                return sock
+        except OSError:
+            pass
+        time.sleep(0.25)
+    raise RuntimeError(
+        f"Cursor OIDC socket not found at {sock}. "
+        "This helper only federates on a Cursor Cloud Agent / Cursor Web VM."
+    )
 
 
 def _unix_http_json(method: str, path: str, payload: dict[str, Any]) -> dict[str, Any]:
-    sock_path = str(agent_socket_path())
+    sock_path = str(wait_for_agent_socket())
     body = json.dumps(payload).encode("utf-8")
     req = (
         f"{method} {path} HTTP/1.1\r\n"
@@ -132,13 +168,58 @@ def _unix_http_json(method: str, path: str, payload: dict[str, Any]) -> dict[str
     parts = status_line.split(" ", 2)
     code = int(parts[1]) if len(parts) > 1 else 0
     if code != 200:
-        raise RuntimeError(f"Cursor OIDC mint failed ({status_line}): {rest[:500]!r}")
-    return json.loads(rest.decode("utf-8"))
+        raise RuntimeError(f"Cursor OIDC mint failed ({status_line}): {rest[:800]!r}")
+    if rest.startswith(b"{"):
+        return json.loads(rest.decode("utf-8"))
+    # Chunked or other framing: last JSON object in the body.
+    text = rest.decode("utf-8", errors="replace")
+    start = text.find("{")
+    end = text.rfind("}")
+    if start >= 0 and end > start:
+        return json.loads(text[start : end + 1])
+    raise RuntimeError(f"Cursor OIDC mint returned non-JSON: {text[:300]!r}")
+
+
+def _mint_via_curl(audience: str) -> dict[str, Any]:
+    sock_path = str(wait_for_agent_socket())
+    proc = subprocess.run(
+        [
+            "curl",
+            "-sS",
+            "--unix-socket",
+            sock_path,
+            "-H",
+            "Content-Type: application/json",
+            "-d",
+            json.dumps({"aud": audience}),
+            "http://cursor-agent/v1/tokens/oidc",
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=20,
+    )
+    if proc.returncode != 0:
+        raise RuntimeError(
+            f"curl OIDC mint failed ({proc.returncode}): {proc.stderr.strip() or proc.stdout[:400]}"
+        )
+    return json.loads(proc.stdout)
 
 
 def mint_cursor_oidc(audience: str = _JWT_AUD) -> tuple[str, int]:
     """Return (jwt, expires_at_unix). Tokens last 5 minutes; cache until expiry."""
-    data = _unix_http_json("POST", "/v1/tokens/oidc", {"aud": audience})
+    errors: list[str] = []
+    data: dict[str, Any] | None = None
+    for fn in (_mint_via_curl, lambda aud: _unix_http_json("POST", "/v1/tokens/oidc", {"aud": aud})):
+        try:
+            data = fn(audience)
+            break
+        except FileNotFoundError as exc:
+            errors.append(str(exc))
+        except Exception as exc:  # noqa: BLE001
+            errors.append(f"{type(exc).__name__}: {exc}")
+    if data is None:
+        raise RuntimeError("Cursor OIDC mint failed: " + " | ".join(errors))
     token = data.get("token")
     exp = data.get("expires_at")
     if not token or not exp:
@@ -151,7 +232,10 @@ def _http_json(url: str, *, data: bytes, headers: dict[str, str]) -> dict[str, A
     try:
         with urlopen(req, timeout=30) as resp:
             return json.loads(resp.read().decode("utf-8"))
-    except Exception as exc:  # noqa: BLE001 — surface STS/IAM errors to the caller
+    except HTTPError as exc:
+        body = exc.read().decode("utf-8", errors="replace")[:1500]
+        raise RuntimeError(f"GCP token exchange failed for {url}: HTTP {exc.code} {body}") from exc
+    except URLError as exc:
         raise RuntimeError(f"GCP token exchange failed for {url}: {exc}") from exc
 
 
@@ -207,6 +291,18 @@ def exchange_cursor_oidc() -> tuple[str, datetime]:
 _wif_creds: Any = None
 
 
+def _ensure_gcs_lib() -> None:
+    try:
+        import google.cloud.storage  # noqa: F401
+        return
+    except ImportError:
+        pass
+    subprocess.check_call(
+        [sys.executable, "-m", "pip", "install", "--user", "google-cloud-storage>=2.14"],
+        timeout=180,
+    )
+
+
 def _wif_credentials():
     global _wif_creds
     if _wif_creds is not None:
@@ -226,6 +322,7 @@ def _wif_credentials():
 
 
 def _storage_client():
+    _ensure_gcs_lib()
     from google.cloud import storage
 
     if on_cloud_agent():
@@ -258,7 +355,11 @@ def open_text(
 
 
 def cache_dir() -> Path:
-    return Path(os.environ.get("LAB_GCS_CACHE", str(Path.home() / ".cache" / "lab-gcs")))
+    if os.environ.get("LAB_GCS_CACHE"):
+        return Path(os.environ["LAB_GCS_CACHE"])
+    if on_cloud_agent():
+        return Path("/tmp/lab-gcs")
+    return Path.home() / ".cache" / "lab-gcs"
 
 
 def ensure_file(path: str | Path, *, dest: Path | None = None) -> Path:
@@ -299,6 +400,12 @@ def torch_load(path: str | Path, **kwargs: Any) -> Any:
         )
     data = _blob(uri).download_as_bytes(timeout=None)
     return torch.load(io.BytesIO(data), **kwargs)
+
+
+def _jwt_claims(token: str) -> dict[str, Any]:
+    payload = token.split(".")[1]
+    pad = "=" * ((4 - len(payload) % 4) % 4)
+    return json.loads(base64.urlsafe_b64decode(payload + pad))
 
 
 def _cmd_mint_oidc() -> int:
@@ -361,6 +468,7 @@ def _cmd_adc() -> int:
     print("export GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES=1")
     print(f'export GOOGLE_CLOUD_PROJECT="{_GCP_PROJECT}"')
     print(f'export CLOUDSDK_CORE_PROJECT="{_GCP_PROJECT}"')
+    print("export LAB_GCS_CACHE=/tmp/lab-gcs")
     print(
         f'if command -v gcloud >/dev/null 2>&1; then '
         f'gcloud auth login --cred-file="{cred_path}" --quiet >/dev/null 2>&1 || true; fi'
@@ -368,16 +476,59 @@ def _cmd_adc() -> int:
     return 0
 
 
+def _cmd_probe() -> int:
+    sock = agent_socket_path()
+    print(f"socket={sock}")
+    print(f"CURSOR_AGENT_SOCKET={os.environ.get('CURSOR_AGENT_SOCKET', '')}")
+    print(f"exists={sock.exists() if True else False}")
+    print(f"on_cloud_agent={on_cloud_agent()}")
+    if not on_cloud_agent():
+        print("not a Cloud Agent VM; laptop ADC is used instead of WIF")
+        return 0
+    token, exp = mint_cursor_oidc(_JWT_AUD)
+    claims = _jwt_claims(token)
+    interesting = {
+        k: claims.get(k)
+        for k in (
+            "iss",
+            "sub",
+            "aud",
+            "agent_runtime",
+            "owner_email",
+            "owner_user_id",
+            "repo_url",
+            "exp",
+        )
+    }
+    print(f"oidc_exp={exp}")
+    print(f"oidc_claims={json.dumps(interesting, ensure_ascii=False)}")
+    access, expiry = exchange_cursor_oidc()
+    print(f"sa_token_len={len(access)} sa_expiry={expiry.isoformat()}Z")
+    uri = gcs_uri_for(".cursor-wif-probe.txt") or gcs_uri_for("data/.cursor-wif-probe.txt")
+    if not uri:
+        mapping = _load_map(find_root())
+        uri = next(iter(mapping.values()), None)
+    if not uri:
+        print("no lab_assets.json mapping to probe")
+        return 1
+    blob = _blob(uri)
+    blob.reload()
+    print(f"gcs_ok uri={uri} size={blob.size}")
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
-        print("usage: lab_gcs.py <adc|mint-oidc>", file=sys.stderr)
+        print("usage: lab_gcs.py <adc|mint-oidc|probe>", file=sys.stderr)
         return 2
     cmd = args[0]
     if cmd == "adc":
         return _cmd_adc()
     if cmd == "mint-oidc":
         return _cmd_mint_oidc()
+    if cmd == "probe":
+        return _cmd_probe()
     print(f"unknown command: {cmd}", file=sys.stderr)
     return 2
 

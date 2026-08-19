@@ -1,0 +1,23 @@
+{
+  "additionalReadonlyPaths": [
+    "/run/cursor",
+    "/run/cursor/api.sock"
+  ],
+  "additionalReadwritePaths": [
+    "/tmp/lab-gcs"
+  ],
+  "networkPolicy": {
+    "default": "allow",
+    "allow": [
+      "sts.googleapis.com",
+      "iamcredentials.googleapis.com",
+      "iam.googleapis.com",
+      "www.googleapis.com",
+      "oauth2.googleapis.com",
+      "storage.googleapis.com",
+      "*.googleapis.com",
+      "pypi.org",
+      "files.pythonhosted.org"
+    ]
+  }
+}
