@@ -476,6 +476,31 @@ def _cmd_adc() -> int:
     return 0
 
 
+def _cmd_pull() -> int:
+    """Download mapped lab files (not FitRec-scale dumps) to their repo-relative paths."""
+    root = find_root()
+    mapping = _load_map(root)
+    if not mapping:
+        print("no lab_assets.json mappings", file=sys.stderr)
+        return 1
+    pulled = 0
+    for rel, uri in mapping.items():
+        if "endomondoHR" in rel or "endomondoHR" in uri:
+            print(f"skip huge {rel}", file=sys.stderr)
+            continue
+        parsed = urlparse(uri)
+        name = Path(parsed.path).name
+        if not name or "." not in name:
+            print(f"skip prefix {rel} -> {uri}", file=sys.stderr)
+            continue
+        dest = root / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        out = ensure_file(rel, dest=dest)
+        print(out)
+        pulled += 1
+    return 0 if pulled else 1
+
+
 def _cmd_probe() -> int:
     sock = agent_socket_path()
     print(f"socket={sock}")
@@ -520,13 +545,15 @@ def _cmd_probe() -> int:
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
-        print("usage: lab_gcs.py <adc|mint-oidc|probe>", file=sys.stderr)
+        print("usage: lab_gcs.py <adc|mint-oidc|probe|pull>", file=sys.stderr)
         return 2
     cmd = args[0]
     if cmd == "adc":
         return _cmd_adc()
     if cmd == "mint-oidc":
         return _cmd_mint_oidc()
+    if cmd == "pull":
+        return _cmd_pull()
     if cmd == "probe":
         return _cmd_probe()
     print(f"unknown command: {cmd}", file=sys.stderr)
