@@ -73,6 +73,15 @@ CMD="${ARGS[0]:-}"
 assert_lab_bucket
 need_gcloud
 
+# Cursor Cloud Agent: federate OIDC → lab-only SA (no JSON keys).
+if [[ -f "${ROOT}/lab_gcs.py" ]]; then
+  _lab_adc="$(python3 "${ROOT}/lab_gcs.py" adc 2>/dev/null || true)"
+  if [[ -n "${_lab_adc}" ]]; then
+    eval "${_lab_adc}"
+  fi
+  unset _lab_adc
+fi
+
 ensure_bucket() {
   if gcloud storage buckets describe "gs://${BUCKET}" --project="${PROJECT_ID}" >/dev/null 2>&1; then
     echo "bucket exists: gs://${BUCKET}"

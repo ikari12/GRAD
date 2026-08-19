@@ -71,11 +71,13 @@ FitRec 原データは共有正本:
 |---|---|---|
 | ノートPC | 個人 Google アカウントの `gcloud auth login` と ADC（`gcloud auth application-default login`） | `push` / `pull`。JSON 鍵は作らない |
 | 自分のユーザー | lab バケットだけの `roles/storage.objectAdmin` | オブジェクトの読み書き |
-| Cloud Agent / CI | **まず Git だけで足りるか見る**。足りるなら lab を pull しない。足りないときだけ WIF または Secret Manager（短命トークン）。JSON 鍵を Secret に置くのは承認後 | 必要な prefix だけ pull |
+| Cloud Agent / CI | Git だけで足りるなら GCS に触れない。足りないとき `lab_gcs.py` が Cursor OIDC → GCP WIF で `cursor-lab-reader` に化ける（JSON 鍵不要） | 必要な prefix だけ pull / ストリーム |
 | スマホ GCS コンソール | 個人アカウント | 一覧・個別ダウンロード。作業場ではない |
-| スマホ Cursor Web | Git | コードが見える。原データが要るときだけ上の認証で `raw/` を pull |
+| スマホ Cursor Web | Git（エディタ）。実験は Cloud Agent | コードが見える。原データが要るとき Agent を起動すると WIF が付く |
 
-Cloud Agent は、追跡済みの `data/*.csv` とスクリプトだけで再現パイプラインの大半が動く。6GB の FitRec JSON は毎回落とさない。
+Cloud Agent は、追跡済みの `data/*.csv` とスクリプトだけで再現パイプラインの大半が動く。6GB の FitRec JSON は毎回落とさない。`lab_gcs.py` 経由のストリームは WIF で自動認証する。Cursor Web のエディタだけでは Git しか見えない。
+
+ネットワークを Allowlist only にしている場合: `sts.googleapis.com`、`iamcredentials.googleapis.com`、`storage.googleapis.com`、`www.googleapis.com`、`iam.googleapis.com`。
 
 ## `.env` と機密
 
