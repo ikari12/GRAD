@@ -120,12 +120,12 @@ def on_cloud_agent() -> bool:
     return bool(os.environ.get("CURSOR_AGENT_SOCKET"))
 
 
-def wait_for_agent_socket(timeout_s: float = 20.0) -> Path:
+def wait_for_agent_socket(timeout_s: float = 60.0) -> Path:
     sock = agent_socket_path()
     deadline = time.time() + timeout_s
     while time.time() < deadline:
         try:
-            if sock.exists():
+            if sock.is_socket() or sock.exists():
                 return sock
         except OSError:
             pass
@@ -356,10 +356,13 @@ def open_text(
 
 def cache_dir() -> Path:
     if os.environ.get("LAB_GCS_CACHE"):
-        return Path(os.environ["LAB_GCS_CACHE"])
-    if on_cloud_agent():
-        return Path("/tmp/lab-gcs")
-    return Path.home() / ".cache" / "lab-gcs"
+        path = Path(os.environ["LAB_GCS_CACHE"])
+    elif on_cloud_agent():
+        path = Path("/tmp/lab-gcs")
+    else:
+        path = Path.home() / ".cache" / "lab-gcs"
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def ensure_file(path: str | Path, *, dest: Path | None = None) -> Path:
@@ -494,11 +497,39 @@ def _cmd_pull() -> int:
             print(f"skip prefix {rel} -> {uri}", file=sys.stderr)
             continue
         dest = root / rel
-        dest.parent.mkdir(parents=True, exist_ok=True)
-        out = ensure_file(rel, dest=dest)
+        try:
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            out = ensure_file(rel, dest=dest)
+        except OSError as exc:
+            print(f"workspace write failed for {rel} ({exc}); using cache", file=sys.stderr)
+            out = ensure_file(rel)
         print(out)
         pulled += 1
     return 0 if pulled else 1
+
+
+def _cmd_boot() -> int:
+    """Cloud Agent / Cursor Web session start: wait for OIDC, write ADC, pull lab files."""
+    os.environ.setdefault("LAB_GCS_CACHE", "/tmp/lab-gcs")
+    cache_dir()
+    print("lab-gcs: boot")
+    if not on_cloud_agent():
+        print("lab-gcs: not a Cloud Agent VM; skip pull")
+        return 0
+    try:
+        wait_for_agent_socket()
+    except Exception as exc:  # noqa: BLE001
+        print(f"lab-gcs: socket wait failed: {exc}", file=sys.stderr)
+        return 0
+    _cmd_adc()
+    try:
+        rc = _cmd_pull()
+    except Exception as exc:  # noqa: BLE001
+        print(f"lab-gcs: pull failed: {exc}", file=sys.stderr)
+        rc = 1
+    probe_rc = _cmd_probe()
+    print(f"lab-gcs: boot pull={rc} probe={probe_rc}")
+    return 0
 
 
 def _cmd_probe() -> int:
@@ -545,7 +576,7 @@ def _cmd_probe() -> int:
 def main(argv: list[str] | None = None) -> int:
     args = list(sys.argv[1:] if argv is None else argv)
     if not args:
-        print("usage: lab_gcs.py <adc|mint-oidc|probe|pull>", file=sys.stderr)
+        print("usage: lab_gcs.py <adc|mint-oidc|probe|doctor|pull|boot>", file=sys.stderr)
         return 2
     cmd = args[0]
     if cmd == "adc":
@@ -554,7 +585,9 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_mint_oidc()
     if cmd == "pull":
         return _cmd_pull()
-    if cmd == "probe":
+    if cmd == "boot":
+        return _cmd_boot()
+    if cmd in {"probe", "doctor"}:
         return _cmd_probe()
     print(f"unknown command: {cmd}", file=sys.stderr)
     return 2

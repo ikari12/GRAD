@@ -1,4 +1,4 @@
 {
   "install": "python3 -m pip install --user 'google-cloud-storage>=2.14' 'google-auth>=2.23'",
-  "start": "eval \"$(python3 lab_gcs.py adc 2>/dev/null || true)\""
+  "start": "python3 lab_gcs.py boot"
 }

@@ -71,7 +71,7 @@ FitRec 原データは共有正本:
 |---|---|---|
 | ノートPC | 個人 Google アカウントの `gcloud auth login` と ADC（`gcloud auth application-default login`） | `push` / `pull`。JSON 鍵は作らない |
 | 自分のユーザー | lab バケットだけの `roles/storage.objectAdmin` | オブジェクトの読み書き |
-| Cloud Agent / CI | Git だけで足りるなら GCS に触れない。足りないとき `lab_gcs.py` が Cursor OIDC → GCP WIF で `cursor-lab-reader` に化ける（JSON 鍵不要） | 必要な prefix だけ pull / ストリーム |
+| Cloud Agent / CI | Git だけで足りるなら GCS に触れない。足りないとき `lab_gcs.py boot` が Cursor OIDC → GCP WIF で `cursor-lab-reader` に化ける（JSON 鍵不要）。信頼条件は `sub==user:383361105` | 必要な prefix だけ pull / ストリーム |
 | スマホ GCS コンソール | 個人アカウント | 一覧・個別ダウンロード。作業場ではない |
 | スマホ Cursor Web | Git（エディタ）。実験は Cloud Agent | コードが見える。原データが要るとき Agent を起動すると WIF が付く |
 

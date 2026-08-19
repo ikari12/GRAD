@@ -5,13 +5,11 @@ alwaysApply: true
 
 # Lab GCS (Cloud Agent / Cursor Web)
 
-Large artifacts live in this repo's private `*-lab` bucket, not the working tree. On Cursor Web / Cloud Agent VMs, `lab_gcs.py` mints OIDC from `CURSOR_AGENT_SOCKET` and federates to `cursor-lab-reader` (lab buckets only). Do not ask for JSON keys. Do not use production buckets.
+Large artifacts live in this repo's private `*-lab` bucket, not Git. `.cursor/environment.json` `start` runs `python3 lab_gcs.py boot`: mint Cursor OIDC, federate to `cursor-lab-reader`, pull `lab_assets.json` (skip FitRec-scale dumps). Do not ask for JSON keys. Do not use production buckets.
 
-To mint OIDC tokens, follow https://cursor.com/docs/cloud-agent/identity
+Verified WIF subject: `user:383361105` (`hisashi@ikari.io`). OIDC: https://cursor.com/docs/cloud-agent/identity
 
 ```bash
 python3 lab_gcs.py probe
-python3 -c "from lab_gcs import open_text; print(open_text('.cursor-wif-probe.txt').read())"
+python3 lab_gcs.py boot
 ```
-
-If `google-cloud-storage` is missing: `python3 -m pip install --user 'google-cloud-storage>=2.14'`. Stream JSON; fetch weights to `/tmp/lab-gcs`, not the repo.
